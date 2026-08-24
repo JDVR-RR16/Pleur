@@ -1,0 +1,2363 @@
+<meta charset="utf-8">
+<title>Pleur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..700,0..100,0..1&display=swap" rel="stylesheet">
+<style>
+/* Pleur — papier & linnen. Licht = crème (dag, actieve taken),
+   donker = bosgroen (avond, rust). Nooit puur wit of zwart. */
+
+:root {
+  /* licht — crème papier */
+  --bg: #F2EEE6;
+  --bg-deep: #E7E1D4;
+  --surface: #F7F4ED;
+  --surface-2: #EDE7DA;
+  --line: #DCD4C4;
+  --line-ui: #8A8069;
+  --ink: #1C1A17;
+  --text: #1C1A17;
+  --text-dim: #5C564C;
+  --text-faint: #6B6456;
+  --accent: #C9944B;
+  --accent-text: #8A5A15;
+  --accent-ink: #1C1A17;
+  --ok: #4F6B4A;
+  --warn: #B07A2E;
+  --danger: #A64B36;
+  --globe-hi: #EDE7DA;
+  --globe-lo: #DDD4C2;
+  --grain-opacity: .045;
+  --radius: 3px;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A2E24;
+    --bg-deep: #142219;
+    --surface: #21382C;
+    --surface-2: #294235;
+    --line: #34503F;
+    --line-ui: #5B7A66;
+    --ink: #EDE7DA;
+    --text: #EDE7DA;
+    --text-dim: #AFBCAC;
+    --text-faint: #8B9A89;
+    --accent: #D8A85F;
+    --accent-text: #D8A85F;
+    --accent-ink: #142219;
+    --ok: #8FBF87;
+    --warn: #E0B168;
+    --danger: #E08A72;
+    --globe-hi: #294235;
+    --globe-lo: #142219;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #1A2E24;
+  --bg-deep: #142219;
+  --surface: #21382C;
+  --surface-2: #294235;
+  --line: #34503F;
+  --line-ui: #5B7A66;
+  --ink: #EDE7DA;
+  --text: #EDE7DA;
+  --text-dim: #AFBCAC;
+  --text-faint: #8B9A89;
+  --accent: #D8A85F;
+  --accent-text: #D8A85F;
+  --accent-ink: #142219;
+  --ok: #8FBF87;
+  --warn: #E0B168;
+  --danger: #E08A72;
+  --globe-hi: #294235;
+  --globe-lo: #142219;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+
+body {
+  background-color: var(--bg);
+  background-image: var(--grain);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-variation-settings: 'SOFT' 30, 'WONK' 0, 'opsz' 14;
+  font-size: 16px;
+  line-height: 1.55;
+  min-height: 100dvh;
+  padding-bottom: calc(78px + env(safe-area-inset-bottom));
+}
+
+/* ---------- kop ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 16px 26px 12px;
+  background-color: var(--bg);
+  background-image: var(--grain);
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  font-family: var(--font-display);
+  font-weight: 400; font-size: 30px; line-height: 1.05; letter-spacing: -.005em;
+  font-variation-settings: 'SOFT' 50, 'WONK' 1, 'opsz' 144;
+}
+.brand-dot { color: var(--accent-text); }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.topbar-sub, .save-chip {
+  font-size: 11px; letter-spacing: .22em; text-transform: lowercase;
+  color: var(--text-faint);
+}
+.save-chip.saving { color: var(--warn); }
+.save-chip.saved  { color: var(--ok); }
+.save-chip.error, .save-chip.readonly { color: var(--danger); }
+
+
+.icon-btn {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: var(--text-faint); line-height: 0;
+  min-width: 44px; min-height: 44px;
+  display: inline-flex; align-items: center; justify-content: flex-end;
+  transition: color .3s ease;
+}
+.icon-btn:hover { color: var(--accent-text); }
+.icon-btn:focus-visible { outline: 1px solid var(--accent-text); outline-offset: 3px; }
+.icon-btn svg { width: 22px; height: 22px; }
+
+/* ---------- ruimte ---------- */
+main { padding: 30px 26px 40px; max-width: 620px; margin: 0 auto; }
+
+.section-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; margin: 0 0 22px;
+}
+.section-title {
+  font-size: 11px; letter-spacing: .24em; text-transform: lowercase;
+  color: var(--text-faint);
+}
+
+.empty {
+  padding: 40px 8px 34px; text-align: left;
+  color: var(--text-dim); font-size: 15px; max-width: 34ch;
+}
+.empty strong {
+  display: block; margin-bottom: 6px;
+  font-family: var(--font-display); font-weight: 400; font-size: 21px;
+  color: var(--text); letter-spacing: .005em;
+  font-variation-settings: 'SOFT' 40, 'WONK' 1, 'opsz' 72;
+}
+
+/* handgetekend accent — één per scherm */
+.illu { color: var(--line-ui); margin: 6px 0 2px; }
+.illu svg { width: 132px; height: auto; display: block; }
+
+/* ---------- kaarten ---------- */
+.card {
+  background: transparent;
+  border: none; border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 18px 2px 17px;
+  margin: 0;
+  cursor: pointer;
+  transition: background-color .35s ease, padding-left .35s ease;
+}
+.card:hover, .card:focus-within {
+  background-color: var(--surface);
+  padding-left: 10px;
+}
+.card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+.card-title {
+  font-family: var(--font-display);
+  font-weight: 400; font-size: 20px; letter-spacing: .005em; line-height: 1.25;
+  font-variation-settings: 'SOFT' 40, 'WONK' 1, 'opsz' 72;
+}
+.card-sub { color: var(--text-dim); font-size: 14px; margin-top: 3px; }
+
+.badge {
+  font-size: 10px; letter-spacing: .16em; text-transform: lowercase;
+  padding: 4px 9px; border: 1px solid var(--line-ui); border-radius: 100px;
+  color: var(--text-dim); white-space: nowrap;
+}
+.badge.ok     { color: var(--ok); border-color: var(--ok); }
+.badge.warn   { color: var(--warn); border-color: var(--warn); }
+.badge.danger { color: var(--danger); border-color: var(--danger); }
+.badge.accent { color: var(--accent-text); border-color: var(--accent); }
+
+/* ---------- data ---------- */
+.specs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px;
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line);
+}
+.spec { display: flex; flex-direction: column; }
+.spec-k { font-size: 10px; letter-spacing: .2em; text-transform: lowercase; color: var(--text-faint); }
+.spec-v {
+  font-size: 15px; color: var(--text); margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.spec-v .unit { color: var(--text-dim); font-size: 12px; }
+
+/* ---------- knoppen ---------- */
+.btn {
+  font-family: var(--font-ui);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: .16em; text-transform: lowercase;
+  background: var(--accent); color: var(--accent-ink);
+  border: 1px solid var(--accent); border-radius: 100px;
+  padding: 11px 20px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px;
+  transition: opacity .3s ease, background-color .3s ease;
+}
+.btn:hover { opacity: .85; }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible, .tab:focus-visible, .chip:focus-visible, .rate-star:focus-visible, .back:focus-visible {
+  outline: 1px solid var(--accent-text); outline-offset: 3px;
+}
+.btn.ghost { background: transparent; color: var(--text); border-color: var(--line-ui); }
+.btn.ghost:hover { border-color: var(--text-dim); opacity: 1; }
+.btn.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+.btn.small { padding: 7px 16px; font-size: 11px; min-height: 44px; }
+.btn.block { width: 100%; }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+.btn-row { display: flex; gap: 10px; margin-top: 24px; }
+.btn-row .btn { flex: 1; }
+
+/* ---------- navigatie ---------- */
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+  display: flex;
+  background-color: var(--bg);
+  background-image: var(--grain);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: none; border: none; cursor: pointer;
+  padding: 14px 0 12px;
+  color: var(--text-dim);
+  font-family: var(--font-ui); font-size: 11px; letter-spacing: .2em; text-transform: lowercase;
+  transition: color .35s ease, background-color .35s ease, border-color .35s ease;
+}
+.tab svg { width: 30px; height: 30px; }
+.tab { border-top: 2px solid transparent; }
+.tab:hover { color: var(--text); background-color: var(--surface); }
+.tab.active {
+  color: var(--accent-text);
+  border-top-color: var(--accent);
+  background-color: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.tab.active span { font-weight: 700; }
+
+/* ---------- modaal ---------- */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 40;
+  background: color-mix(in srgb, var(--bg-deep) 78%, transparent);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: fade .4s ease;
+}
+@media (min-width: 640px) { .modal-backdrop { align-items: center; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background-color: var(--bg);
+  background-image: var(--grain);
+  border: 1px solid var(--line-ui); border-radius: var(--radius);
+  width: 100%; max-width: 540px;
+  max-height: 88dvh; overflow-y: auto;
+  padding: 30px 26px calc(30px + env(safe-area-inset-bottom));
+  animation: rise .45s cubic-bezier(.2, .7, .3, 1);
+}
+@keyframes rise { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .modal, .modal-backdrop { animation: none; }
+  .card { transition: none; }
+}
+.modal-title {
+  font-family: var(--font-display); font-weight: 400; font-size: 22px;
+  letter-spacing: .005em; margin-bottom: 22px; color: var(--text);
+  font-variation-settings: 'SOFT' 40, 'WONK' 1, 'opsz' 72;
+}
+
+/* ---------- formulieren ---------- */
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-size: 10px; letter-spacing: .2em; text-transform: lowercase;
+  color: var(--text-faint); margin-bottom: 7px;
+}
+.field input, .field select, .field textarea {
+  width: 100%;
+  background: transparent;
+  border: none; border-bottom: 1px solid var(--line-ui); border-radius: 0;
+  color: var(--text);
+  font-family: var(--font-ui); font-size: 16px;
+  padding: 7px 2px;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-bottom-color: var(--accent-text); border-bottom-width: 2px;
+  padding-bottom: 6px;
+}
+.field textarea { resize: vertical; min-height: 62px; }
+.field-row { display: flex; gap: 18px; }
+.field-row .field { flex: 1; }
+
+/* ---------- detail ---------- */
+.back {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: none; border: none; cursor: pointer;
+  font-size: 11px; letter-spacing: .2em; text-transform: lowercase;
+  color: var(--text-faint); padding: 0; margin-bottom: 26px;
+  transition: color .3s ease;
+}
+.back:hover { color: var(--text); }
+
+.detail-head { margin-bottom: 26px; max-width: 22ch; }
+.detail-title {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 34px; line-height: 1.12; letter-spacing: -.005em;
+  text-wrap: balance;
+  font-variation-settings: 'SOFT' 50, 'WONK' 1, 'opsz' 144;
+}
+.detail-sub { color: var(--text-dim); font-size: 14px; margin-top: 8px; }
+
+.subsection {
+  font-size: 10px; letter-spacing: .24em; text-transform: lowercase;
+  color: var(--text-faint);
+  margin: 40px 0 14px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+
+/* ---------- onderhoud / batches ---------- */
+.task {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+  padding: 16px 2px 15px 14px;
+  border-bottom: 1px solid var(--line);
+  border-left: 2px solid var(--line-ui);
+}
+.task.ok { border-left-color: var(--ok); }
+.task.warn { border-left-color: var(--warn); }
+.task.danger { border-left-color: var(--danger); }
+.task-name { font-size: 15px; }
+.task-meta { font-size: 13px; color: var(--text-dim); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.task-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+/* ---------- stappen ---------- */
+.steps { margin-top: 10px; counter-reset: step; }
+.step {
+  display: flex; gap: 16px; padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px; line-height: 1.5;
+  transition: opacity .5s ease;
+}
+.step:last-child { border-bottom: none; }
+.step::before {
+  counter-increment: step; content: counter(step);
+  font-family: var(--font-display); font-size: 14px; color: var(--accent-text);
+  flex-shrink: 0; min-width: 1.2em; padding-top: 2px;
+  font-variation-settings: 'WONK' 1;
+}
+.step .step-time {
+  font-size: 12px; color: var(--text-faint);
+  white-space: nowrap; margin-left: auto; padding-left: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.step.done { opacity: .35; }
+.step.active { border-left: 2px solid var(--accent); padding-left: 12px; margin-left: -14px; }
+
+
+.step-tag {
+  font-size: 9px; letter-spacing: .18em; text-transform: lowercase;
+  padding: 2px 7px; border-radius: 100px; white-space: nowrap;
+  border: 1px solid var(--accent); color: var(--accent-text);
+  margin-left: 8px; vertical-align: 2px;
+}
+.step-tag.opt { border-color: var(--line-ui); color: var(--text-faint); }
+
+/* ---------- scanner ---------- */
+.scanner-wrap { position: relative; margin-bottom: 16px; }
+.scanner-wrap video {
+  width: 100%; aspect-ratio: 4/3; object-fit: cover;
+  background: var(--bg-deep);
+  border: 1px solid var(--line-ui); border-radius: var(--radius);
+}
+.scanner-line {
+  position: absolute; left: 10%; right: 10%; top: 50%; height: 1px;
+  background: var(--accent);
+  animation: scanline 2.8s ease-in-out infinite alternate;
+}
+@keyframes scanline { from { transform: translateY(-42px); } to { transform: translateY(42px); } }
+@media (prefers-reduced-motion: reduce) { .scanner-line { animation: none; } }
+.scanner-hint { font-size: 12px; color: var(--text-faint); text-align: center; margin-top: 10px; letter-spacing: .04em; }
+
+/* ---------- diversen ---------- */
+.divider-or {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 10px; letter-spacing: .24em; text-transform: lowercase;
+  color: var(--text-faint); margin: 20px 0;
+}
+.divider-or::before, .divider-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+.tag-source { font-size: 12px; color: var(--accent-text); letter-spacing: .04em; white-space: nowrap; }
+
+.notice {
+  border-left: 2px solid var(--line-ui);
+  padding: 4px 0 4px 14px; margin-bottom: 18px;
+  font-size: 14px; color: var(--text-dim); line-height: 1.5;
+}
+
+.stars { color: var(--accent-text); font-size: 14px; letter-spacing: 3px; }
+.stars .off { color: var(--line-ui); }
+.rate-row { display: flex; gap: 6px; margin: 14px 0 4px; }
+.rate-star {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  font-size: 28px; line-height: 1; color: var(--line-ui);
+  min-width: 44px; min-height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: color .3s ease;
+}
+.rate-star.on { color: var(--accent); }
+
+/* ---------- kaart / globe ---------- */
+.map-wrap { padding: 6px 0 10px; margin-bottom: 10px; }
+.map-wrap canvas { display: block; margin: 0 auto; touch-action: pan-y; cursor: grab; }
+.map-wrap canvas:active { cursor: grabbing; }
+.map-hint { font-size: 11px; color: var(--text-faint); letter-spacing: .2em; text-transform: lowercase; margin: 10px 2px 6px; }
+
+/* ---------- chips ---------- */
+.chips {
+  display: flex; gap: 8px; overflow-x: auto; margin: 0 -26px 22px; padding: 2px 26px 6px;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  font-family: var(--font-ui);
+  font-size: 12px; letter-spacing: .1em; text-transform: lowercase; white-space: nowrap;
+  background: transparent; color: var(--text-dim);
+  border: 1px solid var(--line-ui); border-radius: 100px;
+  padding: 8px 16px; cursor: pointer; flex-shrink: 0;
+  display: inline-flex; align-items: center; min-height: 44px;
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+}
+.chip.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+.peek {
+  height: 46px; overflow: hidden; pointer-events: none;
+  -webkit-mask-image: linear-gradient(#000 15%, transparent);
+  mask-image: linear-gradient(#000 15%, transparent);
+}
+.show-more { margin-top: 18px; }
+
+
+/* ---------- vinkje ---------- */
+.check {
+  display: flex; align-items: flex-start; gap: 13px;
+  cursor: pointer; padding: 4px 0; margin-bottom: 18px;
+}
+.check input { position: absolute; opacity: 0; width: 0; height: 0; }
+.check .box {
+  width: 21px; height: 21px; flex-shrink: 0; margin-top: 1px;
+  border: 1px solid var(--line-ui); border-radius: 2px;
+  display: grid; place-items: center;
+  color: var(--accent-ink);
+  transition: border-color .35s ease, background-color .35s ease;
+}
+.check .box svg { width: 13px; height: 13px; opacity: 0; transition: opacity .3s ease; }
+.check input:checked + .box { border-color: var(--accent); background: var(--accent); }
+.check input:checked + .box svg { opacity: 1; }
+.check input:focus-visible + .box { outline: 1px solid var(--accent-text); outline-offset: 3px; }
+.check-text { font-size: 15px; color: var(--text); display: block; }
+.check-sub { font-size: 13px; color: var(--text-dim); display: block; margin-top: 1px; }
+
+/* ---------- timer ---------- */
+.timer-clock {
+  font-family: var(--font-display);
+  font-size: 58px; font-weight: 400; line-height: 1.1;
+  text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+  font-variation-settings: 'SOFT' 50, 'WONK' 1, 'opsz' 144;
+  transition: color .6s ease;
+}
+.timer-clock.over { color: var(--warn); }
+.timer-bar { height: 1px; background: var(--line); margin: 16px 0 12px; overflow: hidden; }
+.timer-fill { height: 100%; background: var(--accent); width: 0%; transition: width .3s linear; }
+.timer-next {
+  font-size: 13px; color: var(--text-dim);
+  text-align: center; min-height: 20px; letter-spacing: .04em; text-transform: lowercase;
+}
+.timer-next strong { color: var(--accent-text); font-weight: 700; }
+
+</style>
+
+<header class="topbar">
+  <div class="brand">Pleur<span class="brand-dot">.</span></div>
+  <div class="topbar-right">
+    <span class="save-chip" id="save-chip"></span>
+    <span class="topbar-sub" id="topbar-sub"></span>
+    <button class="icon-btn" id="backup-btn" aria-label="Back-up en herstel" title="Back-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.4c.1 3.4.2 6.8.1 10.2"/><path d="M8.3 10c1.3 1.2 2.5 2.5 3.6 3.9 1.2-1.5 2.5-2.8 3.9-4"/><path d="M4.6 15.3c-.2 1.7-.1 3.4.3 5 4.7.5 9.5.5 14.2 0 .4-1.7.5-3.4.3-5.1"/></svg></button>
+  </div>
+</header>
+
+<main id="view"></main>
+
+<nav class="tabbar">
+  <button class="tab" data-tab="gear">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 11.2c-.2-.7.3-1.3 1-1.3l10.3.2c.7 0 1.1.5 1 1.2l-.8 4.6c-.3 1.6-1.8 2.8-3.4 2.7l-4.3-.1c-1.6 0-2.9-1.2-3.1-2.7z"/><path d="M6.5 10.6c2-1.3 10.6-1.4 12.5.2"/><path d="M11 18.6c.1 1.2.2 2.4.4 3.5M14.2 18.7c0 1.1-.1 2.3-.2 3.4"/><path d="M18.7 12.9c2.6-.3 5.3.1 7.9.8.9.3 1.3 1.1.9 1.8-.4.7-1.4.9-2.3.7-2-.5-4.1-.8-6.3-.8"/></svg>
+    <span>Uitrusting</span>
+  </button>
+  <button class="tab" data-tab="coffees">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M25.3 9c1.2 2.7-.6 6.8-4.3 9.9-3.9 3.3-8.8 4.7-11.5 3.2"/><path d="M9.5 22.1c-2.6-1.6-2.7-5.3.4-9 3.2-3.9 8.4-6.3 11.7-5.4"/><path d="M21.6 7.7c1.7.5 3 1.6 3.7 3.1"/><path d="M9.3 21.9c2.9-1.1 3.6-4.2 6-6.4 2.5-2.3 5.5-2.2 8.1-4.4"/><path d="M12.4 21.3c.9-.6 1.6-1.4 2.2-2.3"/></svg>
+    <span>Koffies</span>
+  </button>
+  <button class="tab" data-tab="recipes">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 9.6c4.3-1.1 14.1-1 18.4.2"/><path d="M6.9 9.7 15 21.5c.6 1 1.9 1 2.5.1L25.2 9.8"/><path d="M11.6 10.4c1.1 3.5 2.3 7 3.6 10.4M20.6 10.5c-1 2.7-2.1 5.3-3.3 7.9"/><path d="M16 24.2c-1 1.4-1.6 2.4-1.6 3.3 0 1 .7 1.7 1.6 1.7.9 0 1.6-.7 1.6-1.7 0-.9-.6-1.9-1.6-3.3z"/></svg>
+    <span>Recepten</span>
+  </button>
+</nav>
+
+<div id="modal-root"></div>
+
+<script>
+(async () => {
+  'use strict';
+
+  // ==================================================
+  // Geseede recepturen (statisch — niet in de gedeelde data)
+  // ==================================================
+  const SEED_RECIPES = [
+    { id: 'seed-v60', drink: 'V60 pour-over', cat: 'filter', title: 'Ultimate V60', source: 'James Hoffmann', method: 'Pour-over (V60)',
+      dose: '30 g', water: '500 g', ratio: '1:16,7', temp: '95–100 °C (licht) / 85–95 °C (donker)', time: '± 3:30',
+      steps: [
+        { t: '', s: 'Spoel het papieren filter met heet water, verwarm de V60 en gooi het spoelwater weg.' },
+        { t: '0:00', s: 'Giet 60 g water (2× de dosis) en swirl tot alle koffie nat is — de bloom.', start: true },
+        { t: '0:45', s: 'Giet rustig door tot 300 g; wees hier rond 1:15 mee klaar.' },
+        { t: '1:15', s: 'Giet gelijkmatig verder tot 500 g; wees hier rond 1:45 mee klaar.' },
+        { t: '1:45', s: 'Roer één keer met de klok mee en één keer tegen de klok in, zodat koffie van de wand spoelt.' },
+        { t: '2:00', s: 'Laat het waterniveau zakken en geef de V60 een zachte swirl voor een vlak koffiebed.' },
+        { t: '3:30', s: 'Klaar rond 3:30 — een vlak koffiebed betekent een gelijkmatige extractie.' },
+      ],
+      notes: 'Medium-fijne maling. Bitter? Giet zachter of maal grover. Zuur of dun? Maal iets fijner.' },
+    { id: 'seed-fp', drink: 'French press', cat: 'filter', title: 'Ultimate French Press', source: 'James Hoffmann', method: 'French press',
+      dose: '60–70 g/L', water: '500 g', ratio: '1:15', temp: '95–100 °C', time: '9–12 min totaal',
+      steps: [
+        { t: '0:00', s: 'Doe de koffie (medium gemalen) in de pers en giet het water erop. Niet roeren, deksel eraf laten.', start: true },
+        { t: '4:00', s: 'Breek de korst met een lepel en roer zachtjes.' },
+        { t: '4:30', s: 'Schep het schuim en de drijvende deeltjes van het oppervlak.' },
+        { t: '5:00', s: 'Laat de pers 5 tot 8 minuten staan; de fijnste deeltjes zakken naar de bodem.' },
+        { t: '10:00', s: 'Duw de plunjer tot net onder het oppervlak — niet doordrukken.' },
+        { t: '10:30', s: 'Schenk langzaam uit en laat het laatste bodempje in de pers achter.' },
+      ],
+      notes: 'Het geduld-recept: helderder en zoeter dan klassiek plunjeren.' },
+    { id: 'seed-esp', drink: 'Dubbele espresso (doppio)', cat: 'espresso', title: 'Espresso basis', source: 'James Hoffmann', method: 'Espresso',
+      dose: '18 g', water: '36 g uit (yield)', ratio: '1:2', temp: '93–95 °C (licht) / 88–92 °C (donker)', time: '25–35 s',
+      steps: [
+        { t: '', s: 'Doseer 18 g, verdeel de koffie gelijkmatig (WDT helpt) en tamp vlak en stevig.' },
+        { t: '0:00', s: 'Start de pomp en de timer tegelijk.', start: true },
+        { t: '0:25', s: 'Stop bij 36 g in het kopje — idealiter tussen 25 en 35 seconden.' },
+      ],
+      notes: 'Ratio is het anker: krijg eerst 1:2 consistent, tune daarna pas op smaak. Te snel (<20 s)? Maal fijner. Te langzaam (>40 s)? Maal grover. Zuur en scherp → fijner malen of warmer water; bitter en droog → grover of koeler. Wijzig één ding per keer en proef.' },
+    { id: 'seed-aero', drink: 'AeroPress', cat: 'filter', title: 'AeroPress', source: 'James Hoffmann', method: 'AeroPress',
+      dose: '11 g', water: '200 g', ratio: '1:18', temp: '99–100 °C (licht) / lager bij donker', time: '± 3:30',
+      steps: [
+        { t: '', s: 'Zet de AeroPress rechtop (niet omgekeerd) op je kopje. Het filter hoef je niet te spoelen.' },
+        { t: '0:00', s: 'Doe 11 g koffie in de kamer en giet water tot 200 g.', start: true },
+        { t: '0:10', s: 'Zet de plunjer erop en trek hem een klein stukje omhoog — het vacuüm houdt de temperatuur vast. Niet roeren.' },
+        { t: '2:00', s: 'Swirl de hele AeroPress zachtjes.' },
+        { t: '2:30', s: 'Laat de koffie 30 seconden zakken.' },
+        { t: '3:00', s: 'Druk rustig in, in ongeveer 30 seconden. Stop zodra je het sissen hoort.' },
+      ],
+      notes: 'Fijne maling, fijner dan voor pour-over. Verrassend simpel en heel vergevingsgezind.' },
+    { id: 'seed-moka', drink: 'Moka pot', cat: 'filter', title: 'Moka pot', source: 'James Hoffmann', method: 'Moka pot',
+      dose: 'Vul het mandje losjes', water: 'Tot het ventiel', ratio: '—', temp: 'Start met kokend water', time: '± 5 min',
+      steps: [
+        { t: '', s: 'Vul de basis met net gekookt water tot vlak onder het ventiel.' },
+        { t: '', s: 'Vul het mandje met medium-fijne maling, strijk het vlak en druk niet aan.' },
+        { t: '', s: 'Schroef de kan in elkaar (pas op, heet) en zet hem op middelhoog vuur met het deksel open.' },
+        { t: '', s: 'Zet het vuur laag zodra de koffie gestaag stroomt en haal de kan eraf zodra hij begint te sputteren.' },
+        { t: '', s: 'Houd de basis onder de koude kraan om de extractie te stoppen.' },
+      ],
+      notes: 'Heet water vooraf voorkomt dat de koffie meekookt en verbrandt.' },
+    { id: 'seed-lance-v60', drink: 'V60 pour-over', cat: 'filter', title: 'Single-cup V60 (5 gietingen)', source: 'Lance Hedrick', method: 'Pour-over (V60)',
+      dose: '20 g', water: '320 g', ratio: '1:16', temp: '95–99 °C', time: '± 3:00–3:30',
+      steps: [
+        { t: '', s: 'Spoel het filter, verwarm de brouwer en gooi het spoelwater weg.' },
+        { t: '0:00', s: 'Eerste gieting: 60 g voor de bloom, daarna een zachte swirl.', start: true },
+        { t: '0:45', s: 'Tweede gieting: tot 125 g, in rustige cirkels.' },
+        { t: '1:15', s: 'Derde gieting: tot 190 g.' },
+        { t: '1:45', s: 'Vierde gieting: tot 255 g.' },
+        { t: '2:15', s: 'Vijfde gieting: tot 320 g, afsluiten met een zachte swirl.' },
+        { t: '3:00', s: 'Klaar rond 3:00 tot 3:30, met een vlak koffiebed.' },
+      ],
+      notes: 'Gepulste gietingen houden de temperatuur hoog en de extractie gelijkmatig. Medium-fijne maling.' },
+    { id: 'seed-solo', drink: 'Espresso (solo)', cat: 'espresso', title: 'Espresso (solo)', source: 'Klassiek', method: 'Espresso',
+      dose: '9 g', water: '18 g uit (yield)', ratio: '1:2', temp: '92–94 °C', time: '25–30 s',
+      steps: [
+        { t: '', s: 'Gebruik het single-mandje. Doseer 9 g, verdeel de koffie en tamp vlak.' },
+        { t: '0:00', s: 'Start de pomp en de timer tegelijk.', start: true },
+        { t: '0:25', s: 'Stop bij 18 g in het kopje — idealiter tussen 25 en 30 seconden.' },
+      ],
+      notes: 'Zelfde 1:2-logica als de doppio, maar met minder marge voor fouten. Single-mandjes zijn gevoeliger: maal iets fijner. Veel bars zetten daarom standaard een doppio en serveren de helft — dat is consistenter.' },
+    { id: 'seed-doppio', drink: 'Dubbele espresso (doppio)', cat: 'espresso', title: 'Dubbele espresso (doppio)', source: 'Klassiek', method: 'Espresso',
+      dose: '18 g', water: '36 g uit (yield)', ratio: '1:2', temp: '93–95 °C (licht) / 88–92 °C (donker)', time: '25–35 s',
+      steps: [
+        { t: '', s: 'Doseer 18 g in het dubbele mandje, verdeel de koffie (WDT) en tamp vlak.' },
+        { t: '0:00', s: 'Start de pomp en de timer tegelijk.', start: true },
+        { t: '0:25', s: 'Stop bij 36 g in het kopje — idealiter tussen 25 en 35 seconden.' },
+      ],
+      notes: 'Dit is de basis-shot voor vrijwel alle melkdranken. Te snel? Maal fijner. Te langzaam? Maal grover — wijzig één ding per keer. Zie "Espresso basis" van James Hoffmann voor het tunen op smaak.' },
+    { id: 'seed-americano', drink: 'Americano', cat: 'espresso', title: 'Americano', source: 'Klassiek', method: 'Espresso + water',
+      dose: '18 g espresso (1:2)', water: '90–120 ml heet water', ratio: '± 1:3 shot:water', temp: 'Water ± 80–90 °C', time: '—',
+      steps: [
+        { t: '', s: 'Vul het kopje met 90 tot 120 ml heet water.' },
+        { t: '', s: 'Zet een doppio: 36 g uit 18 g.' },
+        { t: '', s: 'Giet de espresso op het water, zodat de crema bovenop blijft.' },
+      ],
+      notes: 'Water eerst, espresso erop. Begin rond 1:3 en pas aan naar smaak — minder water maakt hem sterker. Iced americano: giet de doppio over een glas vol ijs met koud water.' },
+    { id: 'seed-macchiato', drink: 'Espresso macchiato', cat: 'melk', title: 'Espresso macchiato', source: 'Klassiek', method: 'Espresso + melk',
+      dose: '18 g espresso (1:2)', water: '± 15–30 ml melk', ratio: '± 1:0,5 espresso:melk', temp: 'Melk 55–60 °C', time: '—',
+      steps: [
+        { t: '', s: 'Zet een doppio: 36 g uit 18 g, in een espressokopje.' },
+        { t: '', s: 'Stoom een klein beetje melk tot stevige microfoam.' },
+        { t: '', s: 'Lepel of giet één vlek (macchia) schuim midden op de espresso.' },
+        { t: '', s: 'Serveer direct.' },
+      ],
+      notes: 'De kleinste melkstap: espresso met alleen een toef schuim erop. Het blijft vooral een espresso.' },
+    { id: 'seed-cortado', drink: 'Cortado', cat: 'melk', title: 'Cortado', source: 'Klassiek', method: 'Espresso + melk',
+      dose: '18 g espresso (1:2)', water: '± 40 ml melk', ratio: '1:1 espresso:melk', temp: 'Melk 55–60 °C', time: '—',
+      steps: [
+        { t: '', s: 'Zet een doppio: 36 g uit 18 g, in een klein glas van ongeveer 120 ml.' },
+        { t: '', s: 'Stoom een kleine hoeveelheid melk tot heel dunne microfoam — bijna geen schuim.' },
+        { t: '', s: 'Giet gelijke delen melk bij de espresso (1:1).' },
+      ],
+      notes: 'De melk "snijdt" (corta) de scherpte van de espresso zonder hem te verdrinken. Tussen macchiato en flat white in: koffie voorop, net genoeg melk voor zachtheid. Klassiek geserveerd in een Gibraltar-glas.' },
+    { id: 'seed-flatwhite', drink: 'Flat white', cat: 'melk', title: 'Flat white', source: 'Klassiek', method: 'Espresso + melk',
+      dose: '18 g espresso (1:2)', water: '± 120 ml melk', ratio: '± 1:2,5 espresso:melk', temp: 'Melk 55–60 °C', time: '—',
+      steps: [
+        { t: '', s: 'Zet een doppio: 36 g uit 18 g, in een kopje van 150 tot 160 ml.' },
+        { t: '', s: 'Stoom ongeveer 120 ml melk tot dunne microfoam — trek minder lucht dan bij een cappuccino.' },
+        { t: '', s: 'Swirl de espresso en giet dun in het midden, vanaf hoogte.' },
+        { t: '', s: 'Giet het laatste derde deel laag en dichtbij voor latte art.' },
+      ],
+      notes: 'Het verschil met cappuccino zit in de melk: dunner schuim, kleiner kopje, koffie voorop.' },
+    { id: 'seed-latte', drink: 'Caffè latte', cat: 'melk', title: 'Caffè latte', source: 'Klassiek', method: 'Espresso + melk',
+      dose: '18 g espresso (1:2)', water: '200–250 ml melk', ratio: '± 1:5 espresso:melk', temp: 'Melk 55–60 °C', time: '—',
+      steps: [
+        { t: '', s: 'Zet een doppio: 36 g uit 18 g, in een glas of kop van 250 tot 300 ml.' },
+        { t: '', s: 'Stoom 200 tot 250 ml melk tot lichte microfoam.' },
+        { t: '', s: 'Giet rustig in; de grote hoeveelheid melk maakt de drank zacht en zoet.' },
+      ],
+      notes: 'Milde melkdrank. Kies een koffie met body — een delicate lichte branding verdrinkt. Donkerder gebrande espresso houdt zich beter staande in veel melk.' },
+    { id: 'seed-capp', drink: 'Cappuccino', cat: 'melk', title: 'Cappuccino', source: 'Klassiek', method: 'Espresso + melk',
+      dose: '18 g espresso (1:2)', water: '150–180 ml melk', ratio: '± 1:3 espresso:melk', temp: 'Melk 55–60 °C', time: '—',
+      steps: [
+        { t: '', s: 'Zet een doppio: 36 g uit 18 g.' },
+        { t: '', s: 'Stoom 150 tot 180 ml melk tot ruime microfoam.' },
+        { t: '', s: 'Swirl de espresso en giet dun in het midden, vanaf hoogte.' },
+        { t: '', s: 'Houd de pitcher laag en dichtbij voor het laatste derde deel en giet dan sneller voor het patroon.' },
+      ],
+      notes: 'Meer schuim dan een flat white, in een groter kopje.' },
+    { id: 'seed-icedlatte', drink: 'Iced latte', cat: 'iced', title: 'Iced latte', source: 'Klassiek', method: 'Espresso + melk (iced)',
+      dose: '18 g espresso (1:2)', water: '150–200 ml koude melk', ratio: '± 1:4 espresso:melk', temp: 'Direct over ijs', time: '—',
+      steps: [
+        { t: '', s: 'Doe 5 tot 10 ml suikersiroop in het glas.', opt: true },
+        { t: '', s: 'Vul een glas van 300 ml volledig met ijsblokjes.' },
+        { t: '', s: 'Giet 150 tot 200 ml koude melk over het ijs.' },
+        { t: '', s: 'Zet een doppio (36 g uit 18 g) en giet die direct over de melk.' },
+        { t: '', s: 'Roer kort door.' },
+      ],
+      notes: 'Giet de espresso vers over de koude melk — laat hem niet staan, dan wordt hij vlak en bitter.' },
+    { id: 'seed-syrup', drink: 'Suikersiroop', cat: 'iced', title: 'Suikersiroop', source: 'Klassiek', method: 'Siroop',
+      dose: '100 g suiker', water: '100 g water', ratio: '1:1', temp: 'Warm, niet koken', time: '± 5 min',
+      steps: [
+        { t: '', s: 'Weeg gelijke delen suiker en water, bijvoorbeeld 100 g van elk.' },
+        { t: '', s: 'Verwarm het water tot het net damp geeft — laat het niet koken.' },
+        { t: '', s: 'Roer de suiker erdoor tot de vloeistof helder is.' },
+        { t: '', s: 'Laat afkoelen en bewaar in een schone fles met dop.' },
+      ],
+      notes: 'Houdt ongeveer een maand in de koelkast. Rich syrup (2 delen suiker op 1 deel water) is zoeter en houdt langer — doseer daar dan de helft van. In iced drinks gaat de siroop als eerste in het glas, vóór het ijs.' },
+  ];
+
+  // ==================================================
+  // Gedeelde data: data/brewlog.json via de artifact-capability
+  // ==================================================
+  const DATA_PATH = 'data/brewlog.json';
+  let state = { gear: [], coffees: [], customRecipes: [] };
+  let readOnly = false;
+  const artifact = await window.claude?.use?.('artifact').catch(() => null) ?? null;
+
+  try {
+    const res = await fetch(DATA_PATH, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      state = { gear: [], coffees: [], customRecipes: [], ...data };
+    }
+  } catch { /* nog geen databestand: start leeg */ }
+
+  const saveChip = document.getElementById('save-chip');
+  function setChip(cls, label) { saveChip.className = 'save-chip ' + cls; saveChip.textContent = label; }
+  if (!artifact) { readOnly = true; setChip('readonly', 'Alleen-lezen'); }
+
+  let saveTimer = null;
+  let dirty = false;
+  function queueSave() {
+    if (readOnly) return;
+    dirty = true;
+    setChip('saving', 'Opslaan…');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(doSave, 900);
+  }
+  async function doSave() {
+    if (!dirty || readOnly) return;
+    dirty = false;
+    try {
+      await artifact.publish({ [DATA_PATH]: JSON.stringify(state) });
+      setChip('saved', 'Opgeslagen');
+      setTimeout(() => { if (!dirty) setChip('', ''); }, 2000);
+    } catch (err) {
+      const code = err?.code;
+      if (code === 'conflict') {
+        // Iemand anders was eerder; de viewer herlaadt naar de nieuwste versie.
+        setChip('saving', 'Bijwerken…');
+      } else if (['not_writer', 'not_granted', 'capability_disabled', 'capability_removed', 'not_declared', 'consent_required'].includes(code)) {
+        readOnly = true;
+        setChip('readonly', 'Alleen-lezen');
+        render();
+      } else if (code === 'rate_limited') {
+        dirty = true;
+        setChip('saving', 'Opslaan…');
+        saveTimer = setTimeout(doSave, 8000);
+      } else {
+        dirty = true;
+        setChip('error', 'Opslaan mislukt');
+        saveTimer = setTimeout(doSave, 4000);
+      }
+    }
+  }
+  window.addEventListener('beforeunload', e => {
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  // ==================================================
+  // Barcode-scan (BarcodeDetector; niet overal beschikbaar)
+  // ==================================================
+  const Scanner = (() => {
+    let stream = null, rafId = null;
+    const supported = 'BarcodeDetector' in window && !!navigator.mediaDevices?.getUserMedia;
+    async function start(videoEl, onResult) {
+      const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      videoEl.srcObject = stream;
+      await videoEl.play();
+      const tick = async () => {
+        if (!stream) return;
+        try {
+          const codes = await detector.detect(videoEl);
+          if (codes.length) { const v = codes[0].rawValue; stop(videoEl); onResult(v); return; }
+        } catch { /* frame nog niet klaar */ }
+        rafId = requestAnimationFrame(tick);
+      };
+      tick();
+    }
+    function stop(videoEl) {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      if (videoEl) videoEl.srcObject = null;
+    }
+    return { supported, start, stop };
+  })();
+
+  // ==================================================
+  // UI
+  // ==================================================
+  const view = document.getElementById('view');
+  const modalRoot = document.getElementById('modal-root');
+  const topbarSub = document.getElementById('topbar-sub');
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  const daysSince = iso => Math.floor((Date.now() - new Date(iso)) / 86400000);
+
+  function taskStatus(task) {
+    const done = lastDoneOf(task);
+    if (!done) return { cls: 'danger', label: 'Nog nooit' };
+    const left = task.intervalDays - daysSince(done);
+    if (left < 0) return { cls: 'danger', label: `${-left} d te laat` };
+    if (left <= Math.max(2, task.intervalDays * 0.15)) return { cls: 'warn', label: `Over ${left} d` };
+    return { cls: 'ok', label: `Over ${left} d` };
+  }
+  function gearWorstStatus(g) {
+    if (!g.tasks?.length) return null;
+    const order = { danger: 0, warn: 1, ok: 2 };
+    return g.tasks.map(taskStatus).sort((a, b) => order[a.cls] - order[b.cls])[0];
+  }
+
+  const GEAR_TYPES = ['Espressomachine', 'Maler', 'Brouwer', 'Ketel', 'Weegschaal', 'Overig'];
+  // Bekende merken per type, met hun modellen (kort — zonder merknaam ervoor)
+  const GEAR_BRANDS = {
+    Espressomachine: {
+      'Gaggia': ['Classic Pro', 'Classic Evo'],
+      'Rancilio': ['Silvia', 'Silvia Pro X'],
+      'Sage / Breville': ['Bambino', 'Bambino Plus', 'Barista Express', 'Dual Boiler'],
+      'Lelit': ['Anna', 'Elizabeth', 'MaraX', 'Bianca'],
+      'ECM': ['Classika', 'Synchronika'],
+      'Profitec': ['Pro 500', 'Pro 700'],
+      'La Marzocco': ['Linea Micra', 'Linea Mini', 'GS3'],
+      'Ascaso': ['Dream', 'Steel Duo', 'Baby T'],
+      'Flair': ['Neo', 'Classic', '58'],
+      'Cafelat': ['Robot'],
+      "De'Longhi": ['Dedica', 'La Specialista'],
+    },
+    Maler: {
+      'Timemore': ['C2', 'C3', 'C3 Pro', '064', '078', '078s'],
+      'Comandante': ['C40', 'C40 MK4'],
+      '1Zpresso': ['Q2', 'X-Pro', 'JX-Pro', 'J-Max', 'K-Ultra'],
+      'Kingrinder': ['K4', 'K6'],
+      'Niche': ['Zero', 'Duo'],
+      'DF': ['DF54', 'DF64', 'DF83'],
+      'Eureka': ['Mignon Silenzio', 'Mignon Specialita', 'Oro'],
+      'Fellow': ['Opus', 'Ode Gen 2'],
+      'Baratza': ['Encore', 'Encore ESP', 'Virtuoso+'],
+      'Mahlkönig': ['X54', 'EK43'],
+      'Weber': ['Key', 'EG-1', 'HG-2'],
+      'Wilfa': ['Svart', 'Uniform'],
+    },
+    Brouwer: {
+      'Hario': ['V60-01', 'V60-02', 'Switch', 'Mugen'],
+      'Chemex': ['3-cup', '6-cup', '8-cup'],
+      'Kalita': ['Wave 155', 'Wave 185'],
+      'Origami': ['Dripper S', 'Dripper M'],
+      'AeroPress': ['Original', 'Go', 'Clear', 'XL'],
+      'Clever': ['Dripper'],
+      'Bodum': ['Chambord', 'Brazil'],
+      'Bialetti': ['Moka Express', 'Brikka'],
+      'Espro': ['P7', 'Ultralight'],
+      'Fellow': ['Stagg [X]', 'Stagg [XF]'],
+    },
+    Ketel: {
+      'Fellow': ['Stagg EKG', 'Stagg EKG Pro', 'Corvo EKG'],
+      'Brewista': ['Artisan', 'Artisan Gen 2'],
+      'Hario': ['Buono', 'Buono Power'],
+      'Timemore': ['Fish Smart', 'Fish Pro'],
+      'Bonavita': ['Variable Temp'],
+    },
+    Weegschaal: {
+      'Acaia': ['Pearl', 'Pearl S', 'Lunar', 'Pyxis'],
+      'Timemore': ['Black Mirror Basic 2', 'Black Mirror Nano'],
+      'Felicita': ['Arc', 'Parallel'],
+      'Brewista': ['Smart Scale II'],
+      'Hario': ['V60 Drip Scale'],
+    },
+    Overig: {},
+  };
+  // Aanbevolen onderhoudsroutines per type (interval in dagen)
+  const MAINT_REC = {
+    Espressomachine: [
+      { n: 'Backflush met water', d: 7 },
+      { n: 'Backflush met schoonmaakmiddel', d: 30 },
+      { n: 'Douchezeef & groepskop reinigen', d: 30 },
+      { n: 'Ontkalken', d: 90 },
+      { n: 'Groepskop-dichting vervangen', d: 365 },
+    ],
+    Maler: [
+      { n: 'Burrs uitborstelen', d: 30 },
+      { n: 'Diepe reiniging (grinder cleaner)', d: 90 },
+      { n: 'Burrs controleren / vervangen', d: 730 },
+    ],
+    Brouwer: [
+      { n: 'Grondige reiniging (koffie-olie)', d: 30 },
+    ],
+    Ketel: [
+      { n: 'Ontkalken', d: 60 },
+    ],
+    Weegschaal: [
+      { n: 'Batterijen controleren & kalibreren', d: 180 },
+    ],
+    Overig: [],
+  };
+  const allRecipes = () => [...SEED_RECIPES, ...state.customRecipes];
+
+
+  // Onderhoud: elke routine houdt zijn eigen log bij; de laatste
+  // logdatum bepaalt de status (oudere data gebruikt nog lastDone).
+  const CHECK_ICON = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.4 7.3c1.3 1.3 2.2 2.5 2.9 3.7C6.9 8.2 8.9 5.2 11.8 2.7"/></svg>';
+  const lastDoneOf = t => (t.log && t.log.length)
+    ? t.log.map(e => e.date).sort().at(-1)
+    : (t.lastDone || null);
+  const recCheckList = (items, idPrefix) => items.map((t, i) => `
+    <label class="check">
+      <input type="checkbox" name="${idPrefix}${i}" value="${esc(t.n)}" data-days="${t.d}" checked>
+      <span class="box">${CHECK_ICON}</span>
+      <span><span class="check-text">${esc(t.n)}</span>
+      <span class="check-sub">elke ${t.d} dagen</span></span>
+    </label>`).join('');
+  const pickedTasks = (root, idPrefix, mkId) =>
+    [...root.querySelectorAll(`input[name^="${idPrefix}"]:checked`)].map(el => ({
+      id: mkId(), name: el.value, intervalDays: +el.dataset.days, log: [],
+    }));
+  // Alle logregels van een gear, nieuwste eerst
+  const gearLog = g => (g.tasks || []).flatMap(t =>
+    (t.log || []).map(e => ({ ...e, task: t.name, taskId: t.id })))
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  // Categorie-indeling naar café-menuconventie:
+  // zwarte espressodranken / melkdranken / filter & brew / iced / techniek.
+  const RECIPE_CATS = [
+    { v: 'espresso', l: 'Espresso' },
+    { v: 'melk', l: 'Melk' },
+    { v: 'filter', l: 'Filter & brew' },
+    { v: 'iced', l: 'Iced' },
+  ];
+
+  // Bekende koffievariëteiten (dropdown; "Overig" = vrije invoer)
+  const VARIETIES = [
+    'Typica', 'Bourbon', 'Caturra', 'Catuaí', 'Castillo', 'Colombia', 'Tabi',
+    'Gesha / Geisha', 'SL28', 'SL34', 'Ruiru 11', 'Batian', 'Kent',
+    'Pacamara', 'Pacas', 'Maragogype', 'Mundo Novo', 'Villa Sarchi', 'Sidra',
+    'Wush Wush', 'Java', 'Ethiopian heirloom', 'Typica Mejorado',
+    'Catimor', 'Sarchimor', 'Marsellesa', 'Parainema', 'Obatã', 'Laurina',
+    'Robusta (Canephora)', 'Liberica', 'Excelsa', 'Blend / meerdere',
+  ];
+  const catLabel = v => RECIPE_CATS.find(c => c.v === v)?.l || '';
+  const drinkOf = r => r.drink || r.title;
+  let recipeFilter = 'alle';
+  let recipesExpanded = false;
+  let drinkSel = null; // geselecteerde drank (variantenweergave)
+  let coffeeView = 'lijst';
+  let mapSelection = null; // geselecteerd land op de kaart
+
+  // ------------------------------------------------
+  // Wereldbol: gestileerde continenten ([lon, lat]-polygonen)
+  // + coördinaten van koffielanden.
+  // ------------------------------------------------
+  // Koffielanden (NL + EN zoektermen) → [lon, lat]
+  // Landmassa als dot-matrix (afgeleid van Natural Earth 110m, publiek domein)
+  const LAND_DOTS = new Int16Array([-683,-538,-737,-516,-702,-516,-596,-516,-752,-494,-718,-494,-684,-494,702,-494,-731,-472,-699,-472,-667,-472,-742,-450,-711,-450,-680,-450,1685,-450,-721,-428,-691,-428,-661,-428,1468,-428,1708,-428,-728,-406,-699,-406,-670,-406,-641,-406,1764,-406,-733,-384,-705,-384,-677,-384,-649,-384,-621,-384,-593,-384,1428,-384,1456,-384,1765,-384,-709,-362,-682,-362,-655,-362,-628,-362,-600,-362,-573,-362,1417,-362,1444,-362,1472,-362,1499,-362,1744,-362,-712,-340,-685,-340,-659,-340,-632,-340,-606,-340,-579,-340,-553,-340,190,-340,217,-340,1172,-340,1199,-340,1358,-340,1384,-340,1411,-340,1437,-340,1464,-340,1491,-340,-713,-318,-687,-318,-661,-318,-635,-318,-609,-318,-583,-318,-557,-318,-532,-318,193,-318,219,-318,245,-318,271,-318,1177,-318,1203,-318,1229,-318,1255,-318,1280,-318,1332,-318,1358,-318,1384,-318,1410,-318,1436,-318,1462,-318,1487,-318,1513,-318,-712,-296,-687,-296,-661,-296,-636,-296,-611,-296,-586,-296,-560,-296,-535,-296,-510,-296,174,-296,199,-296,224,-296,249,-296,275,-296,300,-296,1160,-296,1186,-296,1211,-296,1236,-296,1262,-296,1287,-296,1312,-296,1337,-296,1363,-296,1388,-296,1413,-296,1439,-296,1464,-296,1489,-296,1515,-296,-685,-274,-660,-274,-635,-274,-611,-274,-586,-274,-561,-274,-536,-274,-511,-274,-487,-274,158,-274,182,-274,207,-274,232,-274,257,-274,282,-274,306,-274,1149,-274,1174,-274,1198,-274,1223,-274,1248,-274,1273,-274,1297,-274,1322,-274,1347,-274,1372,-274,1397,-274,1421,-274,1446,-274,1471,-274,1496,-274,1521,-274,-706,-252,-682,-252,-657,-252,-633,-252,-609,-252,-584,-252,-560,-252,-536,-252,-511,-252,-487,-252,169,-252,194,-252,218,-252,242,-252,267,-252,291,-252,315,-252,461,-252,1142,-252,1166,-252,1191,-252,1215,-252,1239,-252,1264,-252,1288,-252,1312,-252,1337,-252,1361,-252,1385,-252,1409,-252,1434,-252,1458,-252,1482,-252,1507,-252,-701,-230,-677,-230,-653,-230,-629,-230,-605,-230,-581,-230,-557,-230,-533,-230,-509,-230,-486,-230,-462,-230,-438,-230,160,-230,184,-230,208,-230,231,-230,255,-230,279,-230,303,-230,327,-230,351,-230,447,-230,470,-230,1140,-230,1164,-230,1187,-230,1211,-230,1235,-230,1259,-230,1283,-230,1307,-230,1331,-230,1355,-230,1379,-230,1403,-230,1426,-230,1450,-230,1474,-230,1498,-230,-694,-208,-670,-208,-647,-208,-623,-208,-600,-208,-576,-208,-553,-208,-529,-208,-506,-208,-482,-208,-459,-208,-435,-208,-412,-208,153,-208,177,-208,200,-208,224,-208,247,-208,271,-208,295,-208,318,-208,342,-208,459,-208,483,-208,1165,-208,1189,-208,1212,-208,1236,-208,1259,-208,1283,-208,1306,-208,1330,-208,1354,-208,1377,-208,1401,-208,1424,-208,1448,-208,1471,-208,-686,-186,-663,-186,-639,-186,-616,-186,-593,-186,-570,-186,-547,-186,-523,-186,-500,-186,-477,-186,-454,-186,-430,-186,-407,-186,127,-186,150,-186,173,-186,196,-186,219,-186,243,-186,266,-186,289,-186,312,-186,336,-186,359,-186,452,-186,475,-186,1241,-186,1264,-186,1287,-186,1310,-186,1334,-186,1357,-186,1380,-186,1403,-186,1427,-186,1450,-186,-1800,-164,-722,-164,-699,-164,-676,-164,-653,-164,-630,-164,-607,-164,-585,-164,-562,-164,-539,-164,-516,-164,-493,-164,-470,-164,-447,-164,-424,-164,-401,-164,126,-164,149,-164,172,-164,195,-164,218,-164,241,-164,264,-164,287,-164,310,-164,333,-164,356,-164,379,-164,447,-164,470,-164,493,-164,1250,-164,1273,-164,1296,-164,1319,-164,1342,-164,1365,-164,1434,-164,-756,-142,-733,-142,-711,-142,-688,-142,-665,-142,-643,-142,-620,-142,-597,-142,-575,-142,-552,-142,-529,-142,-506,-142,-484,-142,-461,-142,-438,-142,-416,-142,-393,-142,129,-142,152,-142,174,-142,197,-142,220,-142,242,-142,265,-142,288,-142,310,-142,333,-142,356,-142,379,-142,401,-142,492,-142,1264,-142,1309,-142,1332,-142,1354,-142,1422,-142,1445,-142,-765,-120,-743,-120,-720,-120,-698,-120,-675,-120,-653,-120,-630,-120,-608,-120,-585,-120,-563,-120,-540,-120,-518,-120,-495,-120,-473,-120,-451,-120,-428,-120,-406,-120,-383,-120,157,-120,179,-120,202,-120,224,-120,247,-120,269,-120,292,-120,314,-120,337,-120,359,-120,382,-120,404,-120,1326,-120,-773,-98,-751,-98,-728,-98,-706,-98,-684,-98,-661,-98,-639,-98,-617,-98,-594,-98,-572,-98,-550,-98,-527,-98,-505,-98,-483,-98,-460,-98,-438,-98,-416,-98,-393,-98,-371,-98,142,-98,165,-98,187,-98,209,-98,232,-98,254,-98,276,-98,299,-98,321,-98,343,-98,366,-98,388,-98,1236,-98,1482,-98,-779,-76,-757,-76,-735,-76,-712,-76,-690,-76,-668,-76,-646,-76,-624,-76,-601,-76,-579,-76,-557,-76,-535,-76,-513,-76,-490,-76,-468,-76,-446,-76,-424,-76,-402,-76,-380,-76,-357,-76,131,-76,153,-76,175,-76,198,-76,220,-76,242,-76,264,-76,286,-76,309,-76,331,-76,353,-76,375,-76,1085,-76,1108,-76,1130,-76,1396,-76,1418,-76,1440,-76,1463,-76,-806,-54,-783,-54,-761,-54,-739,-54,-717,-54,-695,-54,-673,-54,-651,-54,-629,-54,-607,-54,-585,-54,-563,-54,-540,-54,-518,-54,-496,-54,-474,-54,-452,-54,-430,-54,-408,-54,-386,-54,-364,-54,123,-54,145,-54,167,-54,189,-54,211,-54,233,-54,255,-54,277,-54,299,-54,321,-54,344,-54,366,-54,388,-54,1051,-54,1227,-54,1382,-54,1404,-54,1426,-54,1448,-54,1515,-54,-786,-32,-764,-32,-742,-32,-720,-32,-698,-32,-676,-32,-654,-32,-632,-32,-610,-32,-588,-32,-566,-32,-544,-32,-522,-32,-500,-32,-478,-32,-456,-32,-434,-32,-412,-32,117,-32,139,-32,161,-32,183,-32,205,-32,227,-32,249,-32,271,-32,293,-32,315,-32,337,-32,359,-32,381,-32,1020,-32,1042,-32,1153,-32,1197,-32,1219,-32,1263,-32,1285,-32,1329,-32,1351,-32,1373,-32,1395,-32,1417,-32,-788,-10,-766,-10,-744,-10,-722,-10,-700,-10,-678,-10,-656,-10,-634,-10,-612,-10,-590,-10,-568,-10,-546,-10,-524,-10,-502,-10,-480,-10,92,-10,114,-10,136,-10,158,-10,180,-10,202,-10,224,-10,246,-10,268,-10,290,-10,312,-10,334,-10,356,-10,378,-10,400,-10,1016,-10,1038,-10,1104,-10,1126,-10,1148,-10,1170,-10,1214,-10,1324,-10,-788,12,-766,12,-744,12,-722,12,-700,12,-678,12,-656,12,-634,12,-612,12,-590,12,-568,12,-546,12,-524,12,-502,12,114,12,136,12,158,12,180,12,202,12,224,12,246,12,268,12,290,12,312,12,334,12,356,12,378,12,400,12,422,12,995,12,1017,12,1105,12,1127,12,1149,12,1171,12,1281,12,-764,34,-742,34,-720,34,-698,34,-676,34,-654,34,-632,34,-610,34,-588,34,-566,34,-544,34,-522,34,117,34,139,34,161,34,183,34,206,34,228,34,250,34,272,34,294,34,316,34,338,34,360,34,382,34,404,34,426,34,448,34,470,34,977,34,1021,34,1153,34,-761,56,-739,56,-717,56,-695,56,-673,56,-651,56,-628,56,-606,56,-584,56,-562,56,-540,56,-98,56,-76,56,-54,56,-32,56,-9,56,57,56,79,56,101,56,123,56,145,56,167,56,189,56,212,56,234,56,256,56,278,56,300,56,322,56,344,56,366,56,388,56,411,56,433,56,455,56,477,56,1007,56,1162,56,1184,56,-779,78,-756,78,-734,78,-712,78,-690,78,-668,78,-645,78,-623,78,-601,78,-112,78,-90,78,-68,78,-46,78,-24,78,-1,78,21,78,43,78,65,78,87,78,110,78,132,78,154,78,176,78,198,78,221,78,243,78,265,78,287,78,310,78,332,78,354,78,376,78,398,78,421,78,443,78,465,78,487,78,798,78,998,78,1242,78,1264,78,-839,100,-750,100,-728,100,-705,100,-683,100,-661,100,-638,100,-125,100,-102,100,-80,100,-58,100,-35,100,-13,100,9,100,32,100,54,100,77,100,99,100,121,100,144,100,166,100,188,100,211,100,233,100,255,100,278,100,300,100,322,100,345,100,367,100,389,100,412,100,434,100,456,100,479,100,501,100,769,100,791,100,1059,100,-855,122,-720,122,-157,122,-134,122,-112,122,-89,122,-67,122,-44,122,-22,122,1,122,23,122,46,122,68,122,91,122,113,122,136,122,158,122,181,122,203,122,226,122,248,122,271,122,293,122,316,122,338,122,361,122,383,122,406,122,428,122,766,122,788,122,991,122,1036,122,1059,122,1081,122,-914,144,-891,144,-869,144,-846,144,-165,144,-142,144,-119,144,-96,144,-74,144,-51,144,-28,144,-6,144,17,144,40,144,63,144,85,144,108,144,131,144,153,144,176,144,199,144,222,144,244,144,267,144,290,144,312,144,335,144,358,144,381,144,403,144,449,144,471,144,767,144,789,144,994,144,1016,144,1039,144,1062,144,1085,144,-974,166,-951,166,-928,166,-905,166,-147,166,-124,166,-101,166,-78,166,-55,166,-32,166,-9,166,14,166,37,166,59,166,82,166,105,166,128,166,151,166,174,166,197,166,220,166,243,166,266,166,289,166,312,166,335,166,358,166,381,166,450,166,473,166,496,166,519,166,748,166,771,166,794,166,817,166,955,166,978,166,1001,166,1024,166,1047,166,1070,166,1207,166,-1033,188,-1010,188,-987,188,-963,188,-894,188,-708,188,-150,188,-127,188,-103,188,-80,188,-57,188,-34,188,-11,188,13,188,36,188,59,188,82,188,106,188,129,188,152,188,175,188,199,188,222,188,245,188,268,188,292,188,315,188,338,188,361,188,431,188,454,188,478,188,501,188,524,188,547,188,733,188,756,188,780,188,803,188,826,188,942,188,966,188,989,188,1012,188,1035,188,-1046,210,-1022,210,-999,210,-975,210,-881,210,-763,210,-150,210,-127,210,-103,210,-80,210,-56,210,-33,210,-9,210,15,210,38,210,62,210,85,210,109,210,132,210,156,210,179,210,203,210,227,210,250,210,274,210,297,210,321,210,344,210,368,210,415,210,439,210,462,210,486,210,509,210,533,210,557,210,580,210,745,210,769,210,792,210,816,210,839,210,863,210,934,210,957,210,981,210,1004,210,1028,210,1051,210,1099,210,-1058,232,-1034,232,-1010,232,-986,232,-148,232,-125,232,-101,232,-77,232,-53,232,-29,232,-5,232,19,232,43,232,67,232,91,232,115,232,139,232,163,232,187,232,211,232,235,232,258,232,282,232,306,232,330,232,354,232,402,232,426,232,450,232,474,232,498,232,522,232,546,232,570,232,689,232,713,232,737,232,761,232,785,232,809,232,833,232,857,232,881,232,905,232,929,232,953,232,977,232,1000,232,1024,232,1048,232,1072,232,1096,232,1120,232,1144,232,-1118,254,-1069,254,-1045,254,-1021,254,-996,254,-144,254,-120,254,-95,254,-71,254,-46,254,-22,254,2,254,27,254,51,254,75,254,100,254,124,254,148,254,173,254,197,254,221,254,246,254,270,254,294,254,319,254,343,254,392,254,416,254,441,254,465,254,489,254,514,254,562,254,611,254,635,254,660,254,684,254,708,254,733,254,757,254,782,254,806,254,830,254,855,254,879,254,903,254,928,254,952,254,976,254,1001,254,1025,254,1049,254,1074,254,1098,254,1123,254,1147,254,1171,254,-1130,276,-1105,276,-1080,276,-1055,276,-1030,276,-1006,276,-981,276,-807,276,-112,276,-87,276,-62,276,-37,276,-13,276,12,276,37,276,62,276,87,276,112,276,136,276,161,276,186,276,211,276,236,276,260,276,285,276,310,276,360,276,385,276,409,276,434,276,459,276,484,276,534,276,558,276,583,276,608,276,633,276,658,276,682,276,707,276,732,276,757,276,782,276,807,276,831,276,856,276,881,276,906,276,931,276,956,276,980,276,1005,276,1030,276,1055,276,1080,276,1105,276,1129,276,1154,276,1179,276,1204,276,-1115,298,-1090,298,-1065,298,-1039,298,-1014,298,-989,298,-963,298,-938,298,-913,298,-76,298,-51,298,-25,298,0,298,25,298,51,298,76,298,101,298,127,298,152,298,177,298,203,298,228,298,254,298,279,298,304,298,330,298,355,298,380,298,406,298,431,298,456,298,507,298,532,298,558,298,583,298,608,298,634,298,659,298,685,298,710,298,735,298,761,298,786,298,811,298,837,298,862,298,887,298,913,298,938,298,963,298,989,298,1014,298,1039,298,1065,298,1090,298,1116,298,1141,298,1166,298,1192,298,1217,298,-1151,320,-1126,320,-1100,320,-1074,320,-1048,320,-1022,320,-996,320,-970,320,-944,320,-918,320,-892,320,-866,320,-840,320,-814,320,-88,320,-62,320,-36,320,-10,320,16,320,42,320,68,320,94,320,120,320,146,320,223,320,353,320,379,320,405,320,431,320,457,320,483,320,509,320,535,320,561,320,587,320,613,320,639,320,664,320,690,320,716,320,742,320,768,320,794,320,820,320,846,320,872,320,898,320,924,320,950,320,976,320,1002,320,1028,320,1054,320,1080,320,1105,320,1131,320,1157,320,1183,320,1209,320,1313,320,-1188,342,-1162,342,-1135,342,-1108,342,-1082,342,-1055,342,-1029,342,-1002,342,-975,342,-949,342,-922,342,-896,342,-869,342,-842,342,-816,342,-789,342,-44,342,-18,342,9,342,35,342,62,342,89,342,381,342,408,342,434,342,461,342,488,342,514,342,541,342,567,342,594,342,621,342,647,342,674,342,700,342,727,342,754,342,780,342,807,342,833,342,860,342,887,342,913,342,940,342,966,342,993,342,1020,342,1046,342,1073,342,1099,342,1126,342,1153,342,1179,342,1312,342,1339,342,1365,342,-1199,364,-1171,364,-1144,364,-1117,364,-1089,364,-1062,364,-1035,364,-1007,364,-980,364,-953,364,-925,364,-898,364,-871,364,-843,364,-816,364,-789,364,-761,364,-51,364,31,364,59,364,86,364,305,364,332,364,359,364,387,364,414,364,441,364,469,364,496,364,523,364,551,364,578,364,605,364,633,364,660,364,687,364,715,364,742,364,769,364,797,364,824,364,851,364,879,364,906,364,933,364,961,364,988,364,1015,364,1043,364,1070,364,1097,364,1125,364,1152,364,1179,364,1207,364,1289,364,1371,364,1398,364,-1209,386,-1181,386,-1153,386,-1124,386,-1096,386,-1068,386,-1040,386,-1012,386,-984,386,-955,386,-927,386,-899,386,-871,386,-843,386,-815,386,-787,386,-758,386,-83,386,-55,386,-27,386,227,386,283,386,311,386,339,386,368,386,396,386,424,386,452,386,480,386,508,386,536,386,565,386,593,386,621,386,649,386,677,386,705,386,734,386,762,386,790,386,818,386,846,386,874,386,902,386,931,386,959,386,987,386,1015,386,1043,386,1071,386,1099,386,1128,386,1156,386,1268,386,1409,386,-1219,408,-1190,408,-1161,408,-1132,408,-1103,408,-1073,408,-1044,408,-1015,408,-986,408,-957,408,-928,408,-899,408,-870,408,-841,408,-812,408,-783,408,-754,408,-85,408,-56,408,-27,408,2,408,89,408,147,408,176,408,205,408,234,408,263,408,292,408,322,408,351,408,380,408,409,408,438,408,467,408,496,408,525,408,554,408,583,408,612,408,641,408,670,408,699,408,728,408,757,408,787,408,816,408,845,408,874,408,903,408,932,408,961,408,990,408,1019,408,1048,408,1077,408,1106,408,1135,408,1164,408,1193,408,1222,408,1252,408,1281,408,-1228,430,-1198,430,-1168,430,-1138,430,-1108,430,-1078,430,-1048,430,-1018,430,-988,430,-958,430,-928,430,-898,430,-867,430,-837,430,-807,430,-777,430,-747,430,-717,430,-85,430,-55,430,-25,430,5,430,125,430,185,430,215,430,246,430,276,430,426,430,456,430,486,430,516,430,546,430,576,430,606,430,637,430,667,430,697,430,727,430,757,430,787,430,817,430,847,430,877,430,907,430,937,430,967,430,998,430,1028,430,1058,430,1088,430,1118,430,1148,430,1178,430,1208,430,1238,430,1268,430,1298,430,1328,430,1419,430,-1238,452,-1207,452,-1176,452,-1144,452,-1113,452,-1082,452,-1051,452,-1019,452,-988,452,-957,452,-926,452,-895,452,-863,452,-832,452,-801,452,-770,452,-738,452,-707,452,-676,452,-645,452,-614,452,11,452,42,452,73,452,105,452,167,452,198,452,229,452,261,452,292,452,354,452,386,452,417,452,448,452,479,452,510,452,542,452,573,452,604,452,635,452,667,452,698,452,729,452,760,452,791,452,823,452,854,452,885,452,916,452,948,452,979,452,1010,452,1041,452,1072,452,1104,452,1135,452,1166,452,1197,452,1229,452,1260,452,1291,452,1322,452,1353,452,-1215,474,-1182,474,-1150,474,-1117,474,-1085,474,-1052,474,-1020,474,-987,474,-955,474,-922,474,-890,474,-857,474,-825,474,-792,474,-760,474,-727,474,-695,474,-662,474,-532,474,-12,474,20,474,53,474,85,474,118,474,150,474,183,474,215,474,248,474,280,474,313,474,345,474,378,474,410,474,443,474,475,474,508,474,540,474,573,474,605,474,638,474,670,474,703,474,735,474,768,474,800,474,833,474,865,474,898,474,930,474,963,474,995,474,1028,474,1060,474,1093,474,1125,474,1158,474,1190,474,1223,474,1255,474,1288,474,1320,474,1353,474,1385,474,-1257,496,-1223,496,-1189,496,-1155,496,-1121,496,-1087,496,-1053,496,-1019,496,-985,496,-951,496,-917,496,-884,496,-850,496,-816,496,-782,496,-748,496,-714,496,-680,496,-578,496,-1,496,33,496,67,496,101,496,135,496,169,496,203,496,237,496,271,496,305,496,338,496,372,496,406,496,440,496,474,496,508,496,542,496,576,496,610,496,644,496,678,496,712,496,746,496,780,496,814,496,848,496,882,496,916,496,949,496,983,496,1017,496,1051,496,1085,496,1119,496,1153,496,1187,496,1221,496,1255,496,1289,496,1323,496,1357,496,1391,496,1425,496,-1266,518,-1231,518,-1195,518,-1160,518,-1124,518,-1088,518,-1053,518,-1017,518,-982,518,-946,518,-911,518,-875,518,-839,518,-768,518,-733,518,-697,518,-662,518,-626,518,-590,518,-92,518,-21,518,50,518,85,518,121,518,157,518,192,518,228,518,263,518,299,518,335,518,370,518,406,518,441,518,477,518,512,518,548,518,584,518,619,518,655,518,690,518,726,518,761,518,797,518,833,518,868,518,904,518,939,518,975,518,1010,518,1046,518,1082,518,1117,518,1153,518,1188,518,1224,518,1259,518,1295,518,1331,518,1366,518,1402,518,1580,518,-1276,540,-1239,540,-1201,540,-1164,540,-1126,540,-1089,540,-1051,540,-1014,540,-977,540,-939,540,-902,540,-864,540,-827,540,-789,540,-752,540,-715,540,-677,540,-640,540,-602,540,-78,540,-3,540,109,540,184,540,221,540,259,540,296,540,333,540,371,540,408,540,446,540,483,540,521,540,558,540,595,540,633,540,670,540,708,540,745,540,783,540,820,540,857,540,895,540,932,540,970,540,1007,540,1045,540,1082,540,1119,540,1157,540,1194,540,1232,540,1269,540,1307,540,1344,540,1569,540,-1602,562,-1286,562,-1246,562,-1207,562,-1167,562,-1128,562,-1088,562,-1049,562,-1009,562,-970,562,-930,562,-890,562,-732,562,-693,562,-653,562,98,562,138,562,217,562,256,562,296,562,336,562,375,562,415,562,454,562,494,562,533,562,573,562,612,562,652,562,691,562,731,562,771,562,810,562,850,562,889,562,929,562,968,562,1008,562,1047,562,1087,562,1127,562,1166,562,1206,562,1245,562,1285,562,1324,562,1364,562,1562,562,1601,562,-1548,584,-1338,584,-1296,584,-1254,584,-1212,584,-1170,584,-1128,584,-1086,584,-1044,584,-1002,584,-960,584,-750,584,-708,584,-666,584,-37,584,131,584,257,584,299,584,341,584,383,584,425,584,467,584,509,584,551,584,593,584,635,584,677,584,719,584,761,584,803,584,845,584,887,584,929,584,971,584,1013,584,1055,584,1097,584,1139,584,1181,584,1223,584,1265,584,1307,584,1349,584,1391,584,1601,584,-1621,606,-1576,606,-1531,606,-1486,606,-1441,606,-1397,606,-1352,606,-1307,606,-1262,606,-1217,606,-1173,606,-1128,606,-1083,606,-1038,606,-993,606,-949,606,-769,606,-724,606,-456,606,82,606,127,606,172,606,262,606,306,606,351,606,396,606,441,606,486,606,530,606,575,606,620,606,665,606,710,606,754,606,799,606,844,606,889,606,934,606,979,606,1023,606,1068,606,1113,606,1158,606,1203,606,1247,606,1292,606,1337,606,1382,606,1427,606,1472,606,1516,606,1651,606,1696,606,-1607,628,-1559,628,-1511,628,-1463,628,-1415,628,-1367,628,-1319,628,-1271,628,-1222,628,-1174,628,-1126,628,-1078,628,-1030,628,-982,628,-934,628,-693,628,-500,628,-452,628,77,628,125,628,173,628,221,628,270,628,318,628,366,628,414,628,462,628,510,628,558,628,606,628,655,628,703,628,751,628,799,628,847,628,895,628,943,628,992,628,1040,628,1088,628,1136,628,1184,628,1232,628,1280,628,1328,628,1377,628,1425,628,1473,628,1521,628,1569,628,1617,628,1665,628,1713,628,1762,628,-1800,650,-1748,650,-1644,650,-1592,650,-1540,650,-1488,650,-1436,650,-1384,650,-1331,650,-1279,650,-1227,650,-1175,650,-1123,650,-1071,650,-1019,650,-967,650,-915,650,-759,650,-707,650,-499,650,-447,650,-186,650,126,650,178,650,282,650,334,650,438,650,490,650,543,650,595,650,647,650,699,650,751,650,803,650,855,650,907,650,959,650,1011,650,1063,650,1115,650,1167,650,1219,650,1271,650,1323,650,1375,650,1427,650,1480,650,1532,650,1584,650,1636,650,1688,650,1740,650,1792,650,-1800,672,-1630,672,-1573,672,-1516,672,-1459,672,-1403,672,-1346,672,-1289,672,-1232,672,-1176,672,-1119,672,-1062,672,-1005,672,-948,672,-892,672,-835,672,-721,672,-665,672,-494,672,-437,672,-381,672,187,672,244,672,301,672,357,672,528,672,584,672,641,672,698,672,755,672,812,672,868,672,925,672,982,672,1039,672,1095,672,1152,672,1209,672,1266,672,1322,672,1379,672,1436,672,1493,672,1550,672,1606,672,1663,672,1720,672,1777,672,-1612,694,-1550,694,-1487,694,-1425,694,-1300,694,-1237,694,-1112,694,-1050,694,-987,694,-925,694,-737,694,-674,694,-487,694,-424,694,-362,694,-299,694,201,694,263,694,326,694,639,694,701,694,764,694,826,694,889,694,951,694,1014,694,1076,694,1139,694,1201,694,1264,694,1326,694,1389,694,1451,694,1514,694,1577,694,1639,694,1764,694,-1242,716,-1173,716,-1103,716,-894,716,-824,716,-755,716,-545,716,-476,716,-406,716,-336,716,-267,716,709,716,779,716,849,716,918,716,988,716,1058,716,1127,716,1197,716,1267,716,1406,716,1476,716,-1169,738,-933,738,-538,738,-459,738,-381,738,-302,738,-223,738,566,738,881,738,960,738,1039,738,1118,738,-1096,760,-1008,760,-920,760,-568,760,-480,760,-392,760,-304,760,-216,760,664,760,1016,760,1104,760]);
+  const ORIGINS = [
+    [['colombia'], [-74, 4]],
+    [['brazil', 'brazilië'], [-52, -12]],
+    [['ethiopi'], [39, 8]],                       // ethiopië/ethiopia
+    [['kenya', 'kenia'], [37, 0]],
+    [['rwanda'], [30, -2]],
+    [['burundi'], [30, -3]],
+    [['tanzania'], [35, -6]],
+    [['uganda', 'oeganda'], [32, 1]],
+    [['congo'], [23, -2]],
+    [['guatemala'], [-90, 15]],
+    [['honduras'], [-87, 15]],
+    [['salvador'], [-89, 14]],
+    [['nicaragua'], [-85, 13]],
+    [['costa rica'], [-84, 10]],
+    [['panama'], [-80, 9]],
+    [['mexico'], [-102, 23]],
+    [['peru'], [-75, -9]],
+    [['bolivia'], [-64, -17]],
+    [['ecuador'], [-78, -2]],
+    [['venezuela'], [-66, 7]],
+    [['jamaica'], [-77, 18]],
+    [['cuba'], [-79, 22]],
+    [['dominicaanse', 'dominican'], [-70, 19]],
+    [['haïti', 'haiti'], [-72, 19]],
+    [['india'], [78, 21]],
+    [['vietnam'], [106, 16]],
+    [['sumatra'], [101, 0]],
+    [['java'], [110, -7]],
+    [['sulawesi'], [120, -2]],
+    [['indonesi'], [118, -2]],                    // indonesië/indonesia
+    [['papoea', 'papua'], [143, -6]],
+    [['jemen', 'yemen'], [47, 15]],
+    [['yunnan', 'china'], [102, 25]],
+    [['thailand'], [101, 15]],
+    [['myanmar'], [96, 20]],
+    [['laos'], [103, 18]],
+    [['filipijnen', 'philippines'], [122, 13]],
+    [['hawaii', 'hawaï', 'kona'], [-156, 20]],
+  ];
+  function originSpot(origin) {
+    if (!origin) return null;
+    const s = origin.toLowerCase();
+    for (const [keys, coord] of ORIGINS) {
+      if (keys.some(k => s.includes(k))) return { key: keys[0], coord };
+    }
+    return null;
+  }
+
+  // ------------------------------------------------
+  // Roast dates: meerdere batches per koffie + drinkvenster.
+  // Richtlijnen uit de specialty-scene: ontgassen 4 d (filter) /
+  // 7 d (espresso), beste venster t/m ± 30 d, uiterlijk ± 60 d.
+  // ------------------------------------------------
+  const REST_FILTER = 4, REST_ESPRESSO = 7, PEAK_END = 30, EXPIRY = 60;
+  const addDays = (iso, d) => {
+    const dt = new Date(iso);
+    dt.setDate(dt.getDate() + d);
+    return dt.toISOString().slice(0, 10);
+  };
+  function batchStatus(roastDate) {
+    const age = daysSince(roastDate);
+    if (age < 0) return { cls: 'warn', label: 'Toekomst', age };
+    if (age < REST_FILTER) return { cls: 'warn', label: `Rust — nog ${REST_FILTER - age} d`, age };
+    if (age < REST_ESPRESSO) return { cls: 'ok', label: 'Klaar voor filter', age };
+    if (age <= PEAK_END) return { cls: 'ok', label: 'Optimaal', age };
+    if (age <= EXPIRY) return { cls: 'warn', label: "Op z'n retour", age };
+    return { cls: 'danger', label: 'Over datum', age };
+  }
+  // Migreer een losse roastDate naar de batchlijst
+  function coffeeBatches(c) {
+    if (!c.batches) {
+      c.batches = c.roastDate ? [{ id: uid(), roastDate: c.roastDate }] : [];
+    }
+    return [...c.batches].sort((a, b) => (b.roastDate || '').localeCompare(a.roastDate || ''));
+  }
+
+
+  // Handgetekende lijnillustraties — één accent per leeg scherm
+  const ILLU = {
+    gear: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 11.2c-.2-.7.3-1.3 1-1.3l10.3.2c.7 0 1.1.5 1 1.2l-.8 4.6c-.3 1.6-1.8 2.8-3.4 2.7l-4.3-.1c-1.6 0-2.9-1.2-3.1-2.7z"/><path d="M6.5 10.6c2-1.3 10.6-1.4 12.5.2"/><path d="M11 18.6c.1 1.2.2 2.4.4 3.5M14.2 18.7c0 1.1-.1 2.3-.2 3.4"/><path d="M18.7 12.9c2.6-.3 5.3.1 7.9.8.9.3 1.3 1.1.9 1.8-.4.7-1.4.9-2.3.7-2-.5-4.1-.8-6.3-.8"/></svg>',
+    coffee: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M25.3 9c1.2 2.7-.6 6.8-4.3 9.9-3.9 3.3-8.8 4.7-11.5 3.2"/><path d="M9.5 22.1c-2.6-1.6-2.7-5.3.4-9 3.2-3.9 8.4-6.3 11.7-5.4"/><path d="M21.6 7.7c1.7.5 3 1.6 3.7 3.1"/><path d="M9.3 21.9c2.9-1.1 3.6-4.2 6-6.4 2.5-2.3 5.5-2.2 8.1-4.4"/><path d="M12.4 21.3c.9-.6 1.6-1.4 2.2-2.3"/></svg>',
+    recipes: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 9.6c4.3-1.1 14.1-1 18.4.2"/><path d="M6.9 9.7 15 21.5c.6 1 1.9 1 2.5.1L25.2 9.8"/><path d="M11.6 10.4c1.1 3.5 2.3 7 3.6 10.4M20.6 10.5c-1 2.7-2.1 5.3-3.3 7.9"/><path d="M16 24.2c-1 1.4-1.6 2.4-1.6 3.3 0 1 .7 1.7 1.6 1.7.9 0 1.6-.7 1.6-1.7 0-.9-.6-1.9-1.6-3.3z"/></svg>',
+  };
+  const illu = k => `<div class="illu">${ILLU[k]}</div>`;
+
+  // Alle maalstanden die op een bepaald apparaat zijn vastgelegd
+  const grindsOnGear = g => state.coffees.flatMap(co => (co.grinds || [])
+    .filter(gr => gr.gearId === g.id)
+    .map(gr => ({ ...gr, coffeeId: co.id, coffeeName: co.name, roaster: co.roaster })));
+
+  const starsHtml = n => n
+    ? `<span class="stars">${'★'.repeat(+n)}<span class="off">${'★'.repeat(5 - +n)}</span></span>` : '';
+
+  // ------------------------------------------------
+  // Brouw-calculator: schaal filter-recepten naar een
+  // gekozen watervolume (of aantal personen à 250 g).
+  // ------------------------------------------------
+  const WATER_PP = 250; // g water per persoon
+  let brewCalc = { id: null, water: null };
+  let recipeCoffee = { id: null, coffeeId: '' }; // gekozen koffie per recept
+  const parseNum = s => {
+    const m = String(s ?? '').match(/(\d+(?:[.,]\d+)?)/);
+    return m ? parseFloat(m[1].replace(',', '.')) : null;
+  };
+  const parseRatioDenom = s => {
+    const m = String(s ?? '').match(/1\s*:\s*(\d+(?:[.,]\d+)?)/);
+    return m ? parseFloat(m[1].replace(',', '.')) : null;
+  };
+  // Schaal alle gram-waarden in een steptekst mee met de factor
+  const scaleGrams = (text, f) => text.replace(/(\d+(?:[.,]\d+)?)(\s*g\b)/g,
+    (_, num, suf) => Math.round(parseFloat(num.replace(',', '.')) * f) + suf);
+
+  // ------------------------------------------------
+  // Brouw-timer: volgt het tijdsschema van een recept en
+  // geeft na afloop een gear-aanbeveling op tijd + gewicht.
+  // ------------------------------------------------
+  let brewTimer = { id: null, running: false, startTs: 0, elapsed: 0, int: null };
+  const parseStepSec = t => {
+    const m = String(t ?? '').match(/^(\d+):(\d{2})$/);
+    return m ? +m[1] * 60 + +m[2] : null;
+  };
+  // Richttijd uit r.time: "± 3:30", "25–35 s", "9–12 min totaal"
+  function parseTargetSec(time) {
+    const s = String(time ?? '');
+    let m = s.match(/(\d+)\s*[–-]\s*(\d+)\s*min/);
+    if (m) return { lo: +m[1] * 60, hi: +m[2] * 60 };
+    m = s.match(/(\d+)\s*[–-]\s*(\d+)\s*s/);
+    if (m) return { lo: +m[1], hi: +m[2] };
+    m = s.match(/(\d+):(\d{2})/);
+    if (m) { const t = +m[1] * 60 + +m[2]; return { lo: t * 0.9, hi: t * 1.1 }; }
+    return null;
+  }
+  const fmtSec = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  const timerNow = () =>
+    brewTimer.running ? (Date.now() - brewTimer.startTs) / 1000 : brewTimer.elapsed;
+
+  function timerTick(timed, endSec, factor, tTarget, timeLabel) {
+    const clock = document.getElementById('t-clock');
+    if (!clock) return; // andere weergave actief; timer loopt door
+    const now = timerNow();
+    clock.textContent = fmtSec(now);
+    clock.classList.toggle('over', now > endSec);
+    const fill = document.getElementById('t-fill');
+    if (fill) fill.style.width = Math.min(100, now / endSec * 100) + '%';
+    document.querySelectorAll('.step[data-sec]').forEach(el => {
+      const sec = +el.dataset.sec;
+      el.classList.toggle('done', now > sec + 8);
+      el.classList.toggle('active', now >= sec && now <= sec + 8);
+    });
+    const nextEl = document.getElementById('t-next');
+    if (nextEl) {
+      const next = timed.find(s => s.sec > now);
+      if (next) {
+        const left = Math.ceil(next.sec - now);
+        const txt = factor !== 1 ? scaleGrams(next.s, factor) : next.s;
+        nextEl.innerHTML = left <= 5
+          ? `<strong>NU: ${esc(txt)}</strong>`
+          : `Over <strong>${left}s</strong> — ${esc(txt)}`;
+        if (left === 1 && navigator.vibrate) navigator.vibrate(200);
+      } else if (timed.length) {
+        nextEl.textContent = now > endSec ? 'Klaar? Rond af voor advies.' : 'Laatste stap bezig…';
+      } else if (tTarget) {
+        // Stopwatch-modus (espresso): stuur live op het doelvenster
+        if (now < tTarget.lo) {
+          nextEl.innerHTML = `Doel ${esc(timeLabel)} — nog <strong>${Math.ceil(tTarget.lo - now)}s</strong>`;
+        } else if (now <= tTarget.hi) {
+          nextEl.innerHTML = `<strong>IN HET DOELVENSTER</strong> — stop rond ${fmtSec(tTarget.hi)}`;
+          if (Math.abs(now - tTarget.lo) < 0.3 && navigator.vibrate) navigator.vibrate(200);
+        } else {
+          nextEl.innerHTML = `Boven het doelvenster (${esc(timeLabel)}) — stop het shot.`;
+        }
+      }
+    }
+  }
+
+  // Advies op basis van gemeten tijd + eindgewicht vs. doel
+  // Geeft de adviesregels terug plus de richting voor de maalstand
+  function brewAdvice(r, actualSec, actualG, targetG) {
+    const t = parseTargetSec(r.time);
+    const esp = r.cat === 'espresso';
+    const advs = [];
+    let dir = null;
+    if (t && actualSec) {
+      const doel = String(r.time || '').trim(); // leesbare richttijd uit het recept zelf
+      if (actualSec > t.hi * 1.05) {
+        dir = 'grover';
+        advs.push(esp
+          ? `Shot te langzaam (${fmtSec(actualSec)} vs. doel ${doel}): maal 1–2 stappen grover.`
+          : `Doorlooptijd te lang (${fmtSec(actualSec)} vs. doel ${doel}): maal grover.`);
+      } else if (actualSec < t.lo * 0.95) {
+        dir = 'fijner';
+        advs.push(esp
+          ? `Shot te snel (${fmtSec(actualSec)} vs. doel ${doel}): maal 1–2 stappen fijner en check je puck-prep (WDT, tamp).`
+          : `Doorlooptijd te kort (${fmtSec(actualSec)} vs. doel ${doel}): maal fijner voor meer extractie.`);
+      } else {
+        advs.push(`Tijd binnen het doel (${fmtSec(actualSec)} vs. ${doel}) — houd deze maalstand aan.`);
+      }
+    }
+    if (targetG && actualG) {
+      const dev = actualG / targetG;
+      if (dev > 1.06) {
+        advs.push(esp
+          ? `Yield te hoog (${actualG} g vs. ${targetG} g): stop het shot eerder — de ratio loopt op en de smaak verdunt.`
+          : `Eindgewicht hoger dan gepland (${actualG} g vs. ${targetG} g): weeg je gietingen en stop op het doelgewicht.`);
+      } else if (dev < 0.94) {
+        advs.push(esp
+          ? `Yield te laag (${actualG} g vs. ${targetG} g): laat het shot iets langer lopen, of check op channeling.`
+          : `Eindgewicht lager dan gepland (${actualG} g vs. ${targetG} g): giet door tot het doelgewicht.`);
+      } else {
+        advs.push(`Gewicht op doel (${actualG} g) — goed zo.`);
+      }
+    }
+    if (!advs.length) advs.push('Vul tijd en/of gewicht in voor een advies.');
+    return { advs, dir };
+  }
+
+  function feedbackModal(r, actualSec, targetG, coffee, grind, gear) {
+    openModal('Brouw-feedback', `
+      <form id="fb-form">
+        <div class="field-row">
+          ${formField('Tijd (m:ss)', 'time', fmtSec(actualSec), 'text', 'placeholder="2:45"')}
+          ${formField('Eindgewicht (g)', 'grams', '', 'number', `inputmode="decimal" placeholder="${targetG || ''}"`)}
+        </div>
+        <div id="fb-advies"></div>
+        <div class="btn-row">
+          <button type="button" class="btn ghost" data-cancel>Sluiten</button>
+          <button type="submit" class="btn">Advies</button>
+        </div>
+      </form>
+      ${grind ? `<div id="fb-update" hidden>
+        <div class="subsection">Stand bijwerken</div>
+        <div class="notice">${esc(coffee.name)}${gear ? ' op ' + esc(gear.brand + ' ' + gear.model) : ''} — nu ${esc(grind.clicks)} ${isNaN(+grind.clicks) ? '' : 'kliks'}</div>
+        <div class="field"><label>Nieuwe stand</label>
+          <input id="fb-clicks" type="text" value="${esc(grind.clicks)}"></div>
+        <div id="fb-dirhint" class="map-hint"></div>
+        <button type="button" class="btn block" id="fb-save">Stand bijwerken</button>
+      </div>` : ''}`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      let measured = { time: '', grams: '' };
+      modal.querySelector('#fb-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const d = formData(e.target);
+        measured = { time: d.time, grams: d.grams };
+        const sec = parseStepSec(d.time) ?? parseNum(d.time);
+        const { advs, dir } = brewAdvice(r, sec, parseNum(d.grams), targetG);
+        modal.querySelector('#fb-advies').innerHTML =
+          advs.map(a => `<div class="notice">→ ${esc(a)}</div>`).join('');
+        const upd = modal.querySelector('#fb-update');
+        if (!upd) return;
+        upd.hidden = false;
+        const clicksEl = modal.querySelector('#fb-clicks');
+        const hint = modal.querySelector('#fb-dirhint');
+        const cur = parseNum(grind.clicks);
+        if (dir && cur !== null) {
+          clicksEl.value = String(dir === 'grover' ? cur + 1 : cur - 1);
+          hint.textContent = `Voorstel: één stap ${dir}. Bij de meeste malers is een hoger getal grover — pas aan als dat bij jouw maler andersom werkt.`;
+        } else {
+          clicksEl.value = grind.clicks;
+          hint.textContent = dir ? `Advies: ${dir} malen.` : 'Tijd zat goed — stand hoeft niet te wijzigen.';
+        }
+      });
+      modal.querySelector('#fb-save')?.addEventListener('click', () => {
+        grind.clicks = modal.querySelector('#fb-clicks').value.trim() || grind.clicks;
+        if (measured.time) grind.time = measured.time;
+        if (measured.grams) grind.yield = measured.grams;
+        queueSave(); render();
+      });
+    });
+  }
+
+
+  function openModal(title, bodyHtml, onMount) {
+    modalRoot.innerHTML = `<div class="modal-backdrop"><div class="modal">
+      <div class="modal-title">${esc(title)}</div>${bodyHtml}</div></div>`;
+    modalRoot.querySelector('.modal-backdrop').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+    // Datumvelden: kalender opent bij een tik op het hele veld
+    modalRoot.querySelectorAll('input[type=date]').forEach(el => {
+      el.addEventListener('click', () => { try { el.showPicker(); } catch {} });
+      el.addEventListener('focus', () => { try { el.showPicker(); } catch {} });
+    });
+    if (onMount) onMount(modalRoot.querySelector('.modal'));
+  }
+  function closeModal() {
+    const v = modalRoot.querySelector('video');
+    if (v) Scanner.stop(v);
+    modalRoot.innerHTML = '';
+  }
+  function formField(label, name, value = '', type = 'text', attrs = '') {
+    return `<div class="field"><label>${esc(label)}</label><input name="${name}" type="${type}" value="${esc(value)}" ${attrs}></div>`;
+  }
+  function formSelect(label, name, options, value = '') {
+    return `<div class="field"><label>${esc(label)}</label><select name="${name}">${options.map(o =>
+      `<option value="${esc(o.v ?? o)}" ${((o.v ?? o) === value) ? 'selected' : ''}>${esc(o.l ?? o)}</option>`).join('')}</select></div>`;
+  }
+  function formData(form) {
+    const out = {};
+    form.querySelectorAll('input, select, textarea').forEach(el => { out[el.name] = el.value.trim(); });
+    return out;
+  }
+  const roBanner = () => readOnly ?
+    `<div class="notice">Je bekijkt BREW·LOG als lezer — wijzigingen opslaan kan alleen met schrijftoegang.</div>` : '';
+  const addBtn = (id, label, aria) => readOnly ? '' :
+    `<button class="btn small" id="${id}"${aria ? ` aria-label="${esc(aria)}"` : ''}>${label}</button>`;
+
+  let route = { tab: 'coffees', detail: null };
+  let lastViewKey = '';
+  function go(tab, detail = null) { route = { tab, detail }; render(); }
+  document.querySelectorAll('.tab').forEach(btn =>
+    btn.addEventListener('click', () => { drinkSel = null; go(btn.dataset.tab); }));
+
+  function render() {
+    document.querySelectorAll('.tab').forEach(b =>
+      b.classList.toggle('active', b.dataset.tab === route.tab));
+    closeModal();
+    if (globeRaf) { cancelAnimationFrame(globeRaf); globeRaf = null; }
+    if (route.tab === 'gear') route.detail ? renderGearDetail(route.detail) : renderGearList();
+    if (route.tab === 'coffees') route.detail ? renderCoffeeDetail(route.detail) : renderCoffeeList();
+    if (route.tab === 'recipes') route.detail ? renderRecipeDetail(route.detail) : renderRecipeList();
+    // Alleen terug naar boven bij echte navigatie, niet bij een herteken-actie
+    const key = `${route.tab}|${route.detail || ''}|${drinkSel || ''}`;
+    if (key !== lastViewKey) { window.scrollTo(0, 0); lastViewKey = key; }
+  }
+
+  // ---------- GEAR ----------
+  function renderGearList() {
+    topbarSub.textContent = 'Uitrusting';
+    const card = g => {
+      const st = g.retired ? null : gearWorstStatus(g);
+      return `<div class="card" data-id="${g.id}" ${g.retired ? 'style="opacity:.55"' : ''}><div class="card-row"><div>
+        <div class="card-title">${esc(g.brand)} ${esc(g.model)}</div>
+        <div class="card-sub">${esc(g.type)}${g.since ? ' · sinds ' + fmtDate(g.since) : ''}</div>
+        </div>${g.retired
+          ? '<span class="badge">niet in gebruik</span>'
+          : (st ? `<span class="badge ${st.cls}">${st.cls === 'ok' ? 'Onderhoud OK' : 'Onderhoud'}</span>` : '')}</div></div>`;
+    };
+    const actief = state.gear.filter(g => !g.retired);
+    const archief = state.gear.filter(g => g.retired);
+    const items = actief.map(card).join('') +
+      (archief.length ? `<div class="subsection">Niet in gebruik — ${archief.length}</div>${archief.map(card).join('')}` : '');
+    view.innerHTML = `${roBanner()}
+      <div class="section-head"><div class="section-title">Uitrusting — ${actief.length}</div>${addBtn('add-gear', '+', 'Uitrusting toevoegen')}</div>
+      ${items || `${illu('gear')}<div class="empty"><strong>nog geen uitrusting</strong>voeg je machine, maler of ketel toe — de onderhoudsroutines komen er dan vanzelf bij.</div>`}`;
+    view.querySelector('#add-gear')?.addEventListener('click', () => gearForm());
+    view.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => go('gear', c.dataset.id)));
+  }
+
+  function gearForm(existing = null) {
+    const g = existing || {};
+    const brandsFor = type => Object.keys(GEAR_BRANDS[type] || {});
+    const modelsFor = (type, brand) => (GEAR_BRANDS[type] || {})[brand] || [];
+    const opts = (list, sel) => [
+      '<option value="">—</option>',
+      ...list.map(v => `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(v)}</option>`),
+      `<option value="__other" ${sel && !list.includes(sel) ? 'selected' : ''}>anders…</option>`,
+    ].join('');
+
+    const type0 = g.type || 'Maler';
+    const brandKnown = brandsFor(type0).includes(g.brand);
+    const modelKnown = brandKnown && modelsFor(type0, g.brand).includes(g.model);
+
+    openModal(existing ? 'Uitrusting bewerken' : 'Uitrusting toevoegen', `
+      <form id="gear-form">
+        ${formSelect('Type', 'type', GEAR_TYPES, type0)}
+        <div class="field"><label>Merk</label>
+          <select name="brandSel">${opts(brandsFor(type0), g.brand)}</select></div>
+        <div class="field" id="brand-other" ${g.brand && !brandKnown ? '' : 'hidden'}>
+          <label>Merk (eigen invoer)</label>
+          <input name="brandOther" type="text" value="${g.brand && !brandKnown ? esc(g.brand) : ''}" placeholder="Bijv. Olympia">
+        </div>
+        <div class="field"><label>Model</label>
+          <select name="modelSel">${opts(modelsFor(type0, g.brand), g.model)}</select></div>
+        <div class="field" id="model-other" ${g.model && !modelKnown ? '' : 'hidden'}>
+          <label>Model (eigen invoer)</label>
+          <input name="modelOther" type="text" value="${g.model && !modelKnown ? esc(g.model) : ''}" placeholder="Bijv. Cremina">
+        </div>
+        ${formField('In gebruik sinds', 'since', g.since || '', 'date')}
+        <div class="field"><label>Notities</label><textarea name="notes">${esc(g.notes || '')}</textarea></div>
+        ${existing ? '' : `<div class="subsection">aanbevolen onderhoud</div>
+        <div id="rec-list">${recCheckList(MAINT_REC[type0] || [], 'rec_')}</div>`}
+        <div class="btn-row">
+          <button type="button" class="btn ghost" data-cancel>Annuleer</button>
+          <button type="submit" class="btn">Opslaan</button>
+        </div>
+      </form>`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      const typeSel = modal.querySelector('[name=type]');
+      const brandSel = modal.querySelector('[name=brandSel]');
+      const modelSel = modal.querySelector('[name=modelSel]');
+      const brandOther = modal.querySelector('#brand-other');
+      const modelOther = modal.querySelector('#model-other');
+      const syncModels = () => {
+        const known = brandSel.value && brandSel.value !== '__other';
+        modelSel.innerHTML = opts(known ? modelsFor(typeSel.value, brandSel.value) : [], '');
+        modelOther.hidden = true;
+      };
+      const recList = modal.querySelector('#rec-list');
+      typeSel.addEventListener('change', () => {
+        brandSel.innerHTML = opts(brandsFor(typeSel.value), '');
+        brandOther.hidden = true;
+        syncModels();
+        if (recList) recList.innerHTML = recCheckList(MAINT_REC[typeSel.value] || [], 'rec_');
+      });
+      brandSel.addEventListener('change', () => {
+        brandOther.hidden = brandSel.value !== '__other';
+        syncModels();
+        if (!brandOther.hidden) brandOther.querySelector('input').focus();
+      });
+      modelSel.addEventListener('change', () => {
+        modelOther.hidden = modelSel.value !== '__other';
+        if (!modelOther.hidden) modelOther.querySelector('input').focus();
+      });
+      modal.querySelector('#gear-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const d = formData(e.target);
+        const data = {
+          type: d.type,
+          brand: d.brandSel === '__other' ? (d.brandOther || '') : d.brandSel,
+          model: d.modelSel === '__other' ? (d.modelOther || '') : d.modelSel,
+          since: d.since,
+          notes: d.notes,
+        };
+        if (!data.brand || !data.model) {
+          (data.brand ? modelSel : brandSel).focus();
+          return;
+        }
+        if (existing) Object.assign(existing, data);
+        else {
+          const tasks = pickedTasks(e.target, 'rec_', () => uid());
+          state.gear.push({ id: uid(), tasks, ...data });
+        }
+        queueSave(); render();
+      });
+    });
+  }
+
+  function renderGearDetail(id) {
+    const g = state.gear.find(x => x.id === id);
+    if (!g) return go('gear');
+    topbarSub.textContent = 'Uitrusting';
+    const log = gearLog(g);
+    const gr = grindsOnGear(g);
+    const tasks = (g.tasks || []).map(t => {
+      const st = taskStatus(t);
+      return `<div class="task ${st.cls}"><div>
+        <div class="task-name">${esc(t.name)}</div>
+        <div class="task-meta">Elke ${t.intervalDays} d · laatst: ${fmtDate(lastDoneOf(t))} · <strong>${st.label}</strong></div>
+        </div>${readOnly ? '' : `<div class="task-actions">
+        <button class="btn small" data-done="${t.id}">Gedaan</button>
+        <button class="btn small ghost" data-del-task="${t.id}">✕</button></div>`}</div>`;
+    }).join('');
+    view.innerHTML = `
+      <button class="back" id="back">← Terug</button>
+      <div class="detail-head">
+        <div class="detail-title">${esc(g.brand)} ${esc(g.model)}</div>
+        <div class="detail-sub">${esc(g.type)}${g.since ? ' · in gebruik sinds ' + fmtDate(g.since) : ''}</div>
+      </div>
+      ${g.notes ? `<div class="notice">${esc(g.notes)}</div>` : ''}
+      <div class="subsection">Onderhoud ${addBtn('add-task', '+', 'Routine toevoegen')}</div>
+      ${tasks || `<div class="empty">Geen onderhoudsroutines. Denk aan backflushen, ontkalken, burrs reinigen.</div>`}
+      ${!readOnly && (MAINT_REC[g.type] || []).some(t => !(g.tasks || []).some(x => x.name === t.n))
+        ? `<button class="btn ghost block" id="add-rec">Aanbevolen routines toevoegen (${(MAINT_REC[g.type] || []).filter(t => !(g.tasks || []).some(x => x.name === t.n)).length})</button>` : ''}
+      ${gr.length ? `<div class="subsection">Maalstanden — ${gr.length}</div>
+        ${gr.map(x => `<div class="card" data-coffee="${x.coffeeId}"><div class="card-row"><div>
+          <div class="card-title" style="font-size:17px">${esc(x.coffeeName)}</div>
+          <div class="card-sub">${esc(x.method)}${x.dose ? ' · ' + esc(x.dose) + ' g' : ''}${x.time ? ' · ' + esc(x.time) : ''}</div>
+        </div><span class="badge accent">${esc(x.clicks)}</span></div></div>`).join('')}` : ''}
+      ${log.length ? `<div class="subsection">Onderhoudslog — ${log.length}</div>
+        ${log.map(e => `<div class="task"><div>
+          <div class="task-name">${esc(e.task)}</div>
+          <div class="task-meta">${fmtDate(e.date)}${e.note ? ' · ' + esc(e.note) : ''}</div>
+        </div>${readOnly ? '' : `<div class="task-actions">
+          <button class="btn small ghost" data-del-log="${e.taskId}|${e.id}" aria-label="Logregel verwijderen">✕</button>
+        </div>`}</div>`).join('')}` : ''}
+      ${readOnly ? '' : `<div class="btn-row">
+        <button class="btn ghost" id="edit">Bewerken</button>
+        <button class="btn ghost" id="retire">${g.retired ? 'Weer in gebruik' : 'Niet in gebruik'}</button>
+        <button class="btn danger" id="del">Verwijderen</button></div>`}`;
+    view.querySelector('#back').addEventListener('click', () => go('gear'));
+    view.querySelector('#edit')?.addEventListener('click', () => gearForm(g));
+    view.querySelector('#retire')?.addEventListener('click', () => {
+      g.retired = !g.retired;
+      queueSave(); render();
+    });
+    view.querySelector('#del')?.addEventListener('click', () => {
+      if (confirm(`${g.brand} ${g.model} verwijderen?`)) {
+        state.gear = state.gear.filter(x => x.id !== g.id);
+        queueSave(); go('gear');
+      }
+    });
+    view.querySelector('#add-task')?.addEventListener('click', () => taskForm(g));
+    view.querySelector('#add-rec')?.addEventListener('click', () => recForm(g));
+    view.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', () =>
+      logForm(g, g.tasks.find(x => x.id === b.dataset.done))));
+    view.querySelectorAll('[data-coffee]').forEach(el =>
+      el.addEventListener('click', () => go('coffees', el.dataset.coffee)));
+    view.querySelectorAll('[data-del-log]').forEach(b => b.addEventListener('click', () => {
+      const [taskId, entryId] = b.dataset.delLog.split('|');
+      const t = g.tasks.find(x => x.id === taskId);
+      if (t) t.log = (t.log || []).filter(e => e.id !== entryId);
+      queueSave(); render();
+    }));
+    view.querySelectorAll('[data-del-task]').forEach(b => b.addEventListener('click', () => {
+      g.tasks = g.tasks.filter(x => x.id !== b.dataset.delTask);
+      queueSave(); render();
+    }));
+  }
+
+  function logForm(g, task) {
+    openModal('Onderhoud loggen', `
+      <form id="log-form">
+        <div class="notice">${esc(task.name)} — elke ${task.intervalDays} dagen</div>
+        ${formField('Datum', 'date', new Date().toISOString().slice(0, 10), 'date', 'required')}
+        ${formField('Notitie', 'note', '', 'text', 'placeholder="Nieuwe dichting, burrs zagen er goed uit"')}
+        <div class="btn-row">
+          <button type="button" class="btn ghost" data-cancel>Annuleer</button>
+          <button type="submit" class="btn">Vastleggen</button>
+        </div>
+      </form>`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      modal.querySelector('#log-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const d = formData(e.target);
+        task.log = task.log || [];
+        task.log.push({ id: uid(), date: d.date, note: d.note || '' });
+        queueSave(); render();
+      });
+    });
+  }
+
+  function recForm(g) {
+    const missing = (MAINT_REC[g.type] || []).filter(t => !(g.tasks || []).some(x => x.name === t.n));
+    openModal('Aanbevolen onderhoud', `
+      <form id="rec-form">
+        <div class="notice">Kies wat je wilt bijhouden voor deze ${esc(g.type.toLowerCase())}.</div>
+        ${recCheckList(missing, 'rec_')}
+        <div class="btn-row">
+          <button type="button" class="btn ghost" data-cancel>Annuleer</button>
+          <button type="submit" class="btn">Toevoegen</button>
+        </div>
+      </form>`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      modal.querySelector('#rec-form').addEventListener('submit', e => {
+        e.preventDefault();
+        g.tasks = [...(g.tasks || []), ...pickedTasks(e.target, 'rec_', () => uid())];
+        queueSave(); render();
+      });
+    });
+  }
+
+  function taskForm(g) {
+    openModal('Onderhoudsroutine', `
+      <form id="task-form">
+        ${formField('Naam', 'name', '', 'text', 'required placeholder="Backflush met schoonmaakmiddel"')}
+        ${formField('Interval (dagen)', 'intervalDays', '30', 'number', 'required min="1"')}
+        ${formField('Laatst gedaan', 'lastDone', '', 'date')}
+        <div class="btn-row">
+          <button type="button" class="btn ghost" data-cancel>Annuleer</button>
+          <button type="submit" class="btn">Opslaan</button>
+        </div>
+      </form>`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      modal.querySelector('#task-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const d = formData(e.target);
+        g.tasks = g.tasks || [];
+        g.tasks.push({ id: uid(), name: d.name, intervalDays: +d.intervalDays,
+          log: d.lastDone ? [{ id: uid(), date: d.lastDone, note: '' }] : [] });
+        queueSave(); render();
+      });
+    });
+  }
+
+  // ---------- COFFEES ----------
+  function renderCoffeeList() {
+    topbarSub.textContent = 'Koffielog';
+    const chips = [{ v: 'lijst', l: 'Lijst' }, { v: 'kaart', l: 'Kaart' }].map(c =>
+      `<button class="chip ${coffeeView === c.v ? 'active' : ''}" data-view="${c.v}">${c.l}</button>`).join('');
+    const body = coffeeView === 'kaart' ? coffeeMapHtml() : state.coffees.map(c => `
+      <div class="card" data-id="${c.id}"><div class="card-row"><div>
+        <div class="card-title">${esc(c.name)}</div>
+        <div class="card-sub">${esc(c.roaster)}${c.origin ? ' · ' + esc(c.origin) : ''}</div>
+        ${c.rating ? `<div style="margin-top:4px">${starsHtml(c.rating)}</div>` : ''}
+        </div>${c.process ? `<span class="badge">${esc(c.process)}</span>` : ''}</div></div>`).join('');
+    view.innerHTML = `${roBanner()}
+      <div class="section-head"><div class="section-title">Koffies — ${state.coffees.length}</div>
+        <div style="display:flex;gap:6px">
+          ${readOnly ? '' : '<button class="btn small ghost" id="scan">Scan</button>'}
+          ${addBtn('add-coffee', '+', 'Koffie toevoegen')}
+        </div></div>
+      <div class="chips">${chips}</div>
+      ${body || `${illu('coffee')}<div class="empty"><strong>nog geen koffies</strong>scan een barcode of voeg er een met de hand toe.</div>`}`;
+    view.querySelectorAll('[data-view]').forEach(ch => ch.addEventListener('click', () => {
+      coffeeView = ch.dataset.view; mapSelection = null; render();
+    }));
+    view.querySelector('#add-coffee')?.addEventListener('click', () => coffeeForm());
+    view.querySelector('#scan')?.addEventListener('click', scanFlow);
+    view.querySelectorAll('.card[data-id]').forEach(c => c.addEventListener('click', () => go('coffees', c.dataset.id)));
+    if (coffeeView === 'kaart') initGlobe();
+  }
+
+  function coffeeGroups() {
+    const groups = new Map();
+    const unplaced = [];
+    state.coffees.forEach(c => {
+      const spot = originSpot(c.origin);
+      if (!spot) { unplaced.push(c); return; }
+      if (!groups.has(spot.key)) groups.set(spot.key, { coord: spot.coord, coffees: [] });
+      groups.get(spot.key).coffees.push(c);
+    });
+    return { groups, unplaced };
+  }
+
+  function coffeeMapHtml() {
+    const { groups, unplaced } = coffeeGroups();
+    const sel = mapSelection && groups.get(mapSelection);
+    const selPanel = sel ? sel.coffees.map(c => `
+      <div class="card" data-id="${c.id}"><div class="card-row"><div>
+        <div class="card-title" style="font-size:15px">${esc(c.name)}</div>
+        <div class="card-sub">${esc(c.roaster)}${c.origin ? ' · ' + esc(c.origin) : ''}</div>
+        ${c.rating ? `<div style="margin-top:4px">${starsHtml(c.rating)}</div>` : ''}
+        </div>${c.process ? `<span class="badge">${esc(c.process)}</span>` : ''}</div></div>`).join('') : '';
+    return `
+      <div class="map-wrap"><canvas id="globe" aria-label="Draaibare wereldbol met koffie-origines" role="img"></canvas></div>
+      ${groups.size === 0 ? `<div class="empty">Geen koffies met een herkende origine. Vul bij een koffie het land in (bijv. "Colombia, Huila").</div>` : ''}
+      ${sel ? `<div class="map-hint">${esc(mapSelection)} — ${sel.coffees.length}</div>${selPanel}` : (groups.size ? `<div class="map-hint">Sleep om te draaien · tik een punt</div>` : '')}
+      ${unplaced.length ? `<div class="notice">Niet op de kaart (origine niet herkend): ${unplaced.map(c => esc(c.name)).join(', ')}</div>` : ''}`;
+  }
+
+  // ------------------------------------------------
+  // Draaibare aardbol (orthografische projectie op canvas)
+  // ------------------------------------------------
+  let globeRaf = null;
+
+  function initGlobe() {
+    const canvas = view.querySelector('#globe');
+    if (!canvas) return;
+    if (globeRaf) cancelAnimationFrame(globeRaf);
+
+    const { groups } = coffeeGroups();
+    const wrapW = canvas.parentElement.clientWidth - 16;
+    const size = Math.min(wrapW, 440);
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = size * dpr; canvas.height = size * dpr;
+    canvas.style.width = size + 'px'; canvas.style.height = size + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const css = getComputedStyle(document.documentElement);
+    const tok = n => css.getPropertyValue(n).trim();
+    const C = {
+      accent: tok('--accent'), landDot: tok('--text-dim'), line: tok('--line'),
+      hi: tok('--globe-hi'), lo: tok('--globe-lo'),
+      ink: tok('--accent-ink'), faint: tok('--text-faint'),
+    };
+
+    const cx = size * 0.56, cy = size / 2, R = size * 0.42; // iets naar rechts: ruimte voor het belt-label
+    const D2R = Math.PI / 180;
+    let rot = -60, tilt = 16;          // startpositie: Amerika's in beeld
+    let dragging = false, moved = false, lastX = 0, lastY = 0;
+    let idleSince = 0;
+    let dotHits = [];                   // [{x, y, key}]
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Projectie: [x, y, zichtbaar]
+    function proj(lon, lat) {
+      const λ = (lon - rot) * D2R, φ = lat * D2R, φ0 = tilt * D2R;
+      const cosφ = Math.cos(φ);
+      const front = Math.sin(φ0) * Math.sin(φ) + Math.cos(φ0) * cosφ * Math.cos(λ);
+      return [
+        cx + R * cosφ * Math.sin(λ),
+        cy - R * (Math.cos(φ0) * Math.sin(φ) - Math.sin(φ0) * cosφ * Math.cos(λ)),
+        front > 0,
+      ];
+    }
+
+    function strokeRuns(pts, close) {
+      // Teken alleen de zichtbare stukken van een lijn/omtrek
+      let run = [];
+      const flush = () => {
+        if (run.length > 1) {
+          ctx.beginPath();
+          run.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+          if (close && run.length === pts.length) ctx.closePath();
+          ctx.stroke();
+          if (close) ctx.fill();
+        }
+        run = [];
+      };
+      pts.forEach(([lo, la]) => {
+        const [x, y, v] = proj(lo, la);
+        if (v) run.push([x, y]); else flush();
+      });
+      flush();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, size, size);
+
+      // Bol met randschaduw
+      const grad = ctx.createRadialGradient(cx - R * .35, cy - R * .35, R * .2, cx, cy, R);
+      grad.addColorStop(0, C.hi);
+      grad.addColorStop(.8, C.lo);
+      grad.addColorStop(1, C.lo);
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7);
+      ctx.fillStyle = grad; ctx.fill();
+      ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.stroke();
+
+      // Graticule
+      ctx.strokeStyle = C.line; ctx.lineWidth = .5;
+      for (let m = -180; m < 180; m += 30) {
+        const pts = []; for (let la = -85; la <= 85; la += 5) pts.push([m, la]);
+        strokeRuns(pts, false);
+      }
+      for (const la of [-60, -30, 0, 30, 60]) {
+        const pts = []; for (let lo = -180; lo <= 180; lo += 5) pts.push([lo, la]);
+        strokeRuns(pts, false);
+      }
+
+      // Coffee belt: gevulde band tussen de keerkringen
+      ctx.beginPath();
+      let started = false;
+      for (let lo = rot - 90; lo <= rot + 90; lo += 3) {
+        const [x, y] = proj(lo, 23.5);
+        started ? ctx.lineTo(x, y) : ctx.moveTo(x, y); started = true;
+      }
+      for (let lo = rot + 90; lo >= rot - 90; lo -= 3) {
+        const [x, y] = proj(lo, -23.5);
+        ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = C.accent + '22'; ctx.fill();
+      ctx.strokeStyle = C.accent + '88'; ctx.lineWidth = .8;
+      ctx.setLineDash([3, 5]);
+      for (const la of [23.5, -23.5]) {
+        const pts = []; for (let lo = -180; lo <= 180; lo += 3) pts.push([lo, la]);
+        strokeRuns(pts, false);
+      }
+      ctx.setLineDash([]);
+
+      // Continenten als dot-matrix (Shopify-stijl)
+      ctx.fillStyle = C.landDot;
+      const dotR = Math.max(1.1, size / 300);
+      for (let i = 0; i < LAND_DOTS.length; i += 2) {
+        const [x, y, v] = proj(LAND_DOTS[i] / 10, LAND_DOTS[i + 1] / 10);
+        if (!v) continue;
+        ctx.beginPath(); ctx.arc(x, y, dotR, 0, 7); ctx.fill();
+      }
+
+      // "The Coffee Belt": label linksboven, buiten de bol, met een
+      // aanwijslijn die schuin naar de linkerrand van de band buigt.
+      const [, beltTopY] = proj(rot, 23.5);
+      const [, beltBotY] = proj(rot, -23.5);
+      const labelY = (beltTopY + beltBotY) / 2;
+      const edgeDy = labelY - cy;
+      const edgeDx = Math.sqrt(Math.max(0, R * R - edgeDy * edgeDy)); // punt op de bolrand
+      const textY = size * 0.085;
+      ctx.save();
+      ctx.fillStyle = C.faint;
+      ctx.font = '400 9px Fraunces, Georgia, serif';
+      ctx.letterSpacing = '2px';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('the coffee belt', 3, textY);
+      ctx.textBaseline = 'alphabetic';
+      ctx.strokeStyle = C.accent + 'AA';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(6, textY + 5);
+      ctx.quadraticCurveTo(6, labelY, cx - edgeDx - 2, labelY);
+      ctx.stroke();
+      ctx.restore();
+
+      // Koffie-punten
+      dotHits = [];
+      groups.forEach((g, key) => {
+        const [x, y, v] = proj(...g.coord);
+        if (!v) return;
+        const n = g.coffees.length;
+        const r = n > 1 ? 10 : 6;
+        ctx.beginPath(); ctx.arc(x, y, r + 4, 0, 7);
+        ctx.strokeStyle = C.accent + '66'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 7);
+        ctx.fillStyle = C.accent; ctx.fill();
+        if (n > 1) {
+          ctx.fillStyle = C.ink;
+          ctx.font = '700 11px Fraunces, Georgia, serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(n, x, y);
+          ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+        }
+        dotHits.push({ x, y, key });
+      });
+
+      canvas.dataset.dots = dotHits.length; // t.b.v. tests
+    }
+
+    function frame(t) {
+      if (!dragging && !reduceMotion && t - idleSince > 2500) rot += 0.12;
+      draw();
+      globeRaf = requestAnimationFrame(frame);
+    }
+
+    canvas.addEventListener('pointerdown', e => {
+      dragging = true; moved = false;
+      lastX = e.clientX; lastY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX, dy = e.clientY - lastY;
+      if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+      rot += dx * 0.45;
+      // Met een vinger alleen draaien; verticaal blijft scrollen van de pagina
+      if (e.pointerType !== 'touch') tilt = Math.max(-40, Math.min(55, tilt + dy * 0.3));
+      lastX = e.clientX; lastY = e.clientY;
+    });
+    canvas.addEventListener('pointerup', e => {
+      dragging = false; idleSince = performance.now();
+      if (!moved) {
+        const rect = canvas.getBoundingClientRect();
+        const px_ = e.clientX - rect.left, py_ = e.clientY - rect.top;
+        const hit = dotHits.find(d => Math.hypot(d.x - px_, d.y - py_) < 16);
+        if (hit) { mapSelection = hit.key; render(); }
+      }
+    });
+    canvas.addEventListener('pointercancel', () => { dragging = false; idleSince = performance.now(); });
+
+    idleSince = performance.now();
+    draw(); // eerste frame direct, ook als RAF nog niet vuurt
+    globeRaf = requestAnimationFrame(frame);
+  }
+
+  function scanFlow() {
+    const camHtml = Scanner.supported ? `
+      <div class="scanner-wrap"><video playsinline muted></video><div class="scanner-line"></div></div>
+      <div class="scanner-hint">Richt de camera op de barcode</div>
+      <div class="divider-or">of handmatig</div>` :
+      `<div class="notice">Camera-scannen is hier niet beschikbaar. Voer de EAN handmatig in.</div>`;
+    openModal('Barcode scannen', `
+      ${camHtml}
+      <form id="ean-form">
+        ${formField('EAN / barcode', 'ean', '', 'text', 'inputmode="numeric" placeholder="8712345678901" required')}
+        <div class="btn-row">
+          <button type="button" class="btn ghost" data-cancel>Annuleer</button>
+          <button type="submit" class="btn">Zoek</button>
+        </div>
+      </form>`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      const handleEan = ean => {
+        const known = state.coffees.find(c => c.ean && c.ean === ean);
+        if (known) { go('coffees', known.id); return; }
+        coffeeForm(null, { ean });
+      };
+      modal.querySelector('#ean-form').addEventListener('submit', e => {
+        e.preventDefault();
+        handleEan(formData(e.target).ean);
+      });
+      const videoEl = modal.querySelector('video');
+      if (videoEl) {
+        Scanner.start(videoEl, handleEan).catch(() => {
+          const wrap = modal.querySelector('.scanner-wrap');
+          if (wrap) wrap.outerHTML = `<div class="notice">Geen cameratoegang. Voer de EAN handmatig in.</div>`;
+        });
+      }
+    });
+  }
+
+  function coffeeForm(existing = null, prefill = {}) {
+    const c = existing || prefill;
+    openModal(existing ? 'Koffie bewerken' : 'Nieuwe koffie', `
+      <form id="coffee-form">
+        ${formField('Naam', 'name', c.name || '', 'text', 'required placeholder="Finca El Paraíso"')}
+        ${formField('Brander', 'roaster', c.roaster || '', 'text', 'placeholder="Friedhats"')}
+        <div class="field-row">
+          ${formField('Origine', 'origin', c.origin || '', 'text', 'placeholder="Colombia, Huila"')}
+          <div class="field"><label>Variëteit</label>
+            <select name="varietySel">
+              <option value="">—</option>
+              ${VARIETIES.map(v => `<option value="${esc(v)}" ${c.variety === v ? 'selected' : ''}>${esc(v)}</option>`).join('')}
+              <option value="__other" ${c.variety && !VARIETIES.includes(c.variety) ? 'selected' : ''}>Overig…</option>
+            </select></div>
+        </div>
+        <div class="field" id="variety-other" ${c.variety && !VARIETIES.includes(c.variety) ? '' : 'hidden'}>
+          <label>Variëteit (eigen invoer)</label>
+          <input name="varietyOther" type="text" value="${c.variety && !VARIETIES.includes(c.variety) ? esc(c.variety) : ''}" placeholder="Bijv. Chiroso">
+        </div>
+        <div class="field-row">
+          ${formSelect('Proces / fermentatie', 'process', ['', 'Washed', 'Natural', 'Honey', 'Anaerobic', 'Carbonic maceration', 'Thermal shock', 'Co-ferment', 'Wet-hulled', 'Decaf', 'Anders'], c.process || '')}
+          ${formSelect('Branding', 'roastLevel', ['', 'Licht', 'Licht-medium', 'Medium', 'Medium-donker', 'Donker'], c.roastLevel || '')}
+        </div>
+        ${existing ? formField('EAN', 'ean', c.ean || '', 'text', 'inputmode="numeric"') : `<div class="field-row">
+          ${formField('Roast date', 'roastDate', c.roastDate || '', 'date')}
+          ${formField('EAN', 'ean', c.ean || '', 'text', 'inputmode="numeric"')}
+        </div>`}
+        ${formField('Smaaknotities', 'tastingNotes', c.tastingNotes || '', 'text', 'placeholder="Rood fruit, jasmijn, honing"')}
+        <div class="field"><label>Notities</label><textarea name="notes">${esc(c.notes || '')}</textarea></div>
+        <div class="btn-row">
+          <button type="button" class="btn ghost" data-cancel>Annuleer</button>
+          <button type="submit" class="btn">Opslaan</button>
+        </div>
+      </form>`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      const varSel = modal.querySelector('[name=varietySel]');
+      const varOther = modal.querySelector('#variety-other');
+      varSel.addEventListener('change', () => {
+        varOther.hidden = varSel.value !== '__other';
+        if (!varOther.hidden) varOther.querySelector('input').focus();
+      });
+      modal.querySelector('#coffee-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const data = formData(e.target);
+        data.variety = data.varietySel === '__other' ? (data.varietyOther || '') : data.varietySel;
+        delete data.varietySel; delete data.varietyOther;
+        if (existing) { Object.assign(existing, data); queueSave(); render(); }
+        else {
+          const batches = data.roastDate ? [{ id: uid(), roastDate: data.roastDate }] : [];
+          const saved = { id: uid(), grinds: [], batches, ...data };
+          state.coffees.push(saved);
+          queueSave(); go('coffees', saved.id);
+        }
+      });
+    });
+  }
+
+  function renderCoffeeDetail(id) {
+    const c = state.coffees.find(x => x.id === id);
+    if (!c) return go('coffees');
+    topbarSub.textContent = 'Koffie';
+    const batches = coffeeBatches(c);
+    const specs = [
+      ['Origine', c.origin], ['Variëteit', c.variety],
+      ['Proces', c.process], ['Branding', c.roastLevel],
+      ['Laatste roast', batches[0] ? fmtDate(batches[0].roastDate) : ''], ['EAN', c.ean],
+    ].filter(([, v]) => v);
+    const grinds = (c.grinds || []).map(gr => {
+      const gear = state.gear.find(g => g.id === gr.gearId);
+      return `<div class="card" data-grind="${gr.id}"><div class="card-row"><div>
+          <div class="card-title" style="font-size:15px">${gear ? esc(gear.brand + ' ' + gear.model) : 'Verwijderde maler'}</div>
+          <div class="card-sub">${esc(gr.method)}</div>
+        </div><span class="badge accent">${esc(gr.clicks)} kliks</span></div>
+        <div class="specs">
+          ${gr.dose ? `<div class="spec"><span class="spec-k">Dosis</span><span class="spec-v">${esc(gr.dose)}<span class="unit"> g</span></span></div>` : ''}
+          ${gr.yield ? `<div class="spec"><span class="spec-k">Yield / water</span><span class="spec-v">${esc(gr.yield)}<span class="unit"> g</span></span></div>` : ''}
+          ${gr.time ? `<div class="spec"><span class="spec-k">Tijd</span><span class="spec-v">${esc(gr.time)}</span></div>` : ''}
+          ${gr.temp ? `<div class="spec"><span class="spec-k">Temp</span><span class="spec-v">${esc(gr.temp)}<span class="unit"> °C</span></span></div>` : ''}
+        </div>
+        ${gr.rating ? `<div style="margin-top:8px" class="stars">${'★'.repeat(+gr.rating)}<span class="off">${'★'.repeat(5 - +gr.rating)}</span></div>` : ''}
+        ${gr.notes ? `<div class="card-sub" style="margin-top:6px">${esc(gr.notes)}</div>` : ''}</div>`;
+    }).join('');
+    view.innerHTML = `
+      <button class="back" id="back">← Terug</button>
+      <div class="detail-head">
+        <div class="detail-title">${esc(c.name)}</div>
+        <div class="detail-sub">${esc(c.roaster || '')}</div>
+        ${readOnly
+          ? (c.rating ? `<div style="margin-top:8px">${starsHtml(c.rating)}</div>` : '')
+          : `<div class="rate-row" role="radiogroup" aria-label="Beoordeling">
+              ${[1, 2, 3, 4, 5].map(n =>
+                `<button class="rate-star ${c.rating >= n ? 'on' : ''}" data-rate="${n}" aria-label="${n} sterren">★</button>`).join('')}
+            </div>`}
+      </div>
+      ${c.tastingNotes ? `<div class="notice">☕ ${esc(c.tastingNotes)}</div>` : ''}
+      ${specs.length ? `<div class="card" style="cursor:default"><div class="specs" style="border-top:none;padding-top:0;margin-top:0">
+        ${specs.map(([k, v]) => `<div class="spec"><span class="spec-k">${k}</span><span class="spec-v">${esc(v)}</span></div>`).join('')}
+      </div></div>` : ''}
+      ${c.notes ? `<div class="notice">${esc(c.notes)}</div>` : ''}
+      <div class="subsection">Roast dates ${addBtn('add-batch', '+', 'Roast date toevoegen')}</div>
+      ${batches.length ? batches.map(b => {
+        const st = batchStatus(b.roastDate);
+        return `<div class="task ${st.cls}"><div>
+          <div class="task-name">${fmtDate(b.roastDate)} · ${st.age} d oud</div>
+          <div class="task-meta">Filter vanaf ${fmtDate(addDays(b.roastDate, REST_FILTER))} · espresso vanaf ${fmtDate(addDays(b.roastDate, REST_ESPRESSO))}</div>
+          <div class="task-meta">Beste t/m ${fmtDate(addDays(b.roastDate, PEAK_END))} · uiterlijk ${fmtDate(addDays(b.roastDate, EXPIRY))}</div>
+          ${b.note ? `<div class="task-meta">${esc(b.note)}</div>` : ''}
+        </div>
+        <div class="task-actions">
+          <span class="badge ${st.cls}">${st.label}</span>
+          ${readOnly ? '' : `<button class="btn small ghost" data-del-batch="${b.id}" aria-label="Batch verwijderen">✕</button>`}
+        </div></div>`;
+      }).join('') : `<div class="empty">Nog geen roast date. Voeg er een toe voor het drinkvenster.</div>`}
+      <div class="subsection">Maalstanden &amp; recepten ${addBtn('add-grind', '+', 'Maalstand toevoegen')}</div>
+      ${grinds || `<div class="empty">Nog geen maalstanden voor deze koffie.</div>`}
+      ${readOnly ? '' : `<div class="btn-row">
+        <button class="btn ghost" id="edit">Bewerken</button>
+        <button class="btn danger" id="del">Verwijderen</button></div>`}`;
+    view.querySelector('#back').addEventListener('click', () => go('coffees'));
+    view.querySelectorAll('[data-rate]').forEach(b => b.addEventListener('click', () => {
+      const n = +b.dataset.rate;
+      c.rating = (c.rating === n) ? null : n; // nogmaals tikken = rating wissen
+      queueSave(); render();
+    }));
+    view.querySelector('#edit')?.addEventListener('click', () => coffeeForm(c));
+    view.querySelector('#del')?.addEventListener('click', () => {
+      if (confirm(`${c.name} verwijderen?`)) {
+        state.coffees = state.coffees.filter(x => x.id !== c.id);
+        queueSave(); go('coffees');
+      }
+    });
+    view.querySelector('#add-batch')?.addEventListener('click', () => batchForm(c));
+    view.querySelectorAll('[data-del-batch]').forEach(b => b.addEventListener('click', () => {
+      c.batches = (c.batches || []).filter(x => x.id !== b.dataset.delBatch);
+      queueSave(); render();
+    }));
+    view.querySelector('#add-grind')?.addEventListener('click', () => grindForm(c));
+    if (!readOnly) view.querySelectorAll('[data-grind]').forEach(el => el.addEventListener('click', () => {
+      const gr = c.grinds.find(x => x.id === el.dataset.grind);
+      grindForm(c, gr);
+    }));
+  }
+
+  function batchForm(c) {
+    openModal('Roast date toevoegen', `
+      <form id="batch-form">
+        ${formField('Brandatum', 'roastDate', new Date().toISOString().slice(0, 10), 'date', 'required')}
+        ${formField('Notitie', 'note', '', 'text', 'placeholder="250 g zak, tweede keer besteld"')}
+        <div class="notice">Filter kan doorgaans vanaf ${REST_FILTER} dagen, espresso vanaf ${REST_ESPRESSO}. Beste venster t/m ± ${PEAK_END} dagen, uiterlijk ± ${EXPIRY} dagen na branden.</div>
+        <div class="btn-row">
+          <button type="button" class="btn ghost" data-cancel>Annuleer</button>
+          <button type="submit" class="btn">Opslaan</button>
+        </div>
+      </form>`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      modal.querySelector('#batch-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const d = formData(e.target);
+        c.batches = c.batches || [];
+        c.batches.push({ id: uid(), roastDate: d.roastDate, note: d.note || '' });
+        queueSave(); render();
+      });
+    });
+  }
+
+  function grindForm(c, existing = null) {
+    if (!state.gear.length) {
+      openModal('Nog geen uitrusting', `
+        <p style="margin-bottom:14px;color:var(--text-dim)">Voeg eerst een maler of machine toe onder Uitrusting.</p>
+        <button class="btn block" data-cancel>OK</button>`, m =>
+        m.querySelector('[data-cancel]').addEventListener('click', closeModal));
+      return;
+    }
+    const gr = existing || {};
+    openModal(existing ? 'Instelling bewerken' : 'Maalstand toevoegen', `
+      <form id="grind-form">
+        ${formSelect('Apparaat', 'gearId', state.gear.map(g => ({ v: g.id, l: `${g.brand} ${g.model}` })), gr.gearId || state.gear[0].id)}
+        ${formSelect('Methode', 'method', ['Espresso', 'Pour-over (V60)', 'AeroPress', 'French press', 'Moka pot', 'Cold brew', 'Batch brew', 'Anders'], gr.method || 'Espresso')}
+        <div class="field-row">
+          ${formField('Kliks / stand', 'clicks', gr.clicks || '', 'text', 'required placeholder="18"')}
+          ${formField('Dosis (g)', 'dose', gr.dose || '', 'text', 'inputmode="decimal" placeholder="18"')}
+        </div>
+        <div class="field-row">
+          ${formField('Yield / water (g)', 'yield', gr.yield || '', 'text', 'inputmode="decimal" placeholder="36"')}
+          ${formField('Tijd', 'time', gr.time || '', 'text', 'placeholder="0:28"')}
+        </div>
+        ${formField('Watertemp (°C)', 'temp', gr.temp || '', 'text', 'inputmode="decimal" placeholder="94"')}
+        ${formSelect('Beoordeling', 'rating', ['', { v: '1', l: '★' }, { v: '2', l: '★★' }, { v: '3', l: '★★★' }, { v: '4', l: '★★★★' }, { v: '5', l: '★★★★★' }], gr.rating || '')}
+        <div class="field"><label>Recept-aanpassingen / notities</label><textarea name="notes" placeholder="Iets fijner dan standaard, langere pre-infusie">${esc(gr.notes || '')}</textarea></div>
+        <div class="btn-row">
+          ${existing ? '<button type="button" class="btn danger" id="del-grind">✕</button>' : ''}
+          <button type="button" class="btn ghost" data-cancel>Annuleer</button>
+          <button type="submit" class="btn">Opslaan</button>
+        </div>
+      </form>`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      if (existing) modal.querySelector('#del-grind').addEventListener('click', () => {
+        c.grinds = c.grinds.filter(x => x.id !== existing.id);
+        queueSave(); render();
+      });
+      modal.querySelector('#grind-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const d = formData(e.target);
+        if (existing) Object.assign(existing, d);
+        else { c.grinds = c.grinds || []; c.grinds.push({ id: uid(), ...d }); }
+        queueSave(); render();
+      });
+    });
+  }
+
+  // ---------- RECIPES ----------
+  function renderRecipeList() {
+    topbarSub.textContent = 'Recepten';
+    const filtered = recipeFilter === 'alle'
+      ? allRecipes()
+      : allRecipes().filter(r => r.cat === recipeFilter);
+
+    // Groepeer per drank; varianten (bronnen/stijlen) zitten eronder
+    const drinkMap = new Map();
+    filtered.forEach(r => {
+      const d = drinkOf(r);
+      if (!drinkMap.has(d)) drinkMap.set(d, []);
+      drinkMap.get(d).push(r);
+    });
+
+    // Variantenweergave voor één drank
+    if (drinkSel && drinkMap.has(drinkSel)) {
+      const variants = drinkMap.get(drinkSel);
+      view.innerHTML = `${roBanner()}
+        <button class="back" id="back-drink">← Alle recepten</button>
+        <div class="detail-head">
+          <div class="detail-title">${esc(drinkSel)}</div>
+          <div class="detail-sub">Kies een stijl</div>
+        </div>
+        ${variants.map(r => `
+          <div class="card" data-id="${r.id}"><div class="card-row"><div>
+            <div class="card-title" style="font-size:15px">${esc(r.source)}</div>
+            <div class="card-sub">${r.title !== drinkSel ? esc(r.title) + ' · ' : ''}${esc(r.method)}</div>
+            </div><span class="badge accent">Recept</span></div></div>`).join('')}`;
+      view.querySelector('#back-drink').addEventListener('click', () => { drinkSel = null; render(); });
+      view.querySelectorAll('.card[data-id]').forEach(c =>
+        c.addEventListener('click', () => go('recipes', c.dataset.id)));
+      return;
+    }
+    drinkSel = null;
+
+    const chips = [{ v: 'alle', l: 'Alle' }, ...RECIPE_CATS].map(c =>
+      `<button class="chip ${recipeFilter === c.v ? 'active' : ''}" data-cat="${c.v}">${c.l}</button>`).join('');
+    const drinks = [...drinkMap.entries()];
+    const card = ([d, rs]) => `
+      <div class="card" data-drink="${esc(d)}"><div class="card-row"><div>
+        <div class="card-title">${esc(d)}</div>
+        <div class="card-sub">${esc(rs[0].method)}</div>
+        </div></div></div>`;
+    // Top 5 tonen; nummer 6 half zichtbaar met "Bekijk meer"
+    const clamped = !recipesExpanded && drinks.length > 5;
+    const items = clamped
+      ? drinks.slice(0, 5).map(card).join('') +
+        `<div class="peek">${card(drinks[5])}</div>
+         <button class="btn ghost block show-more" id="show-more">Bekijk meer (${drinks.length - 5})</button>`
+      : drinks.map(card).join('') +
+        (recipesExpanded && drinks.length > 5
+          ? `<button class="btn ghost block show-more" id="show-less">Toon minder</button>` : '');
+    view.innerHTML = `${roBanner()}
+      <div class="section-head"><div class="section-title">Recepten — ${drinks.length}</div>${addBtn('add-recipe', '+', 'Recept toevoegen')}</div>
+      <div class="chips">${chips}</div>
+      ${items || `${illu('recipes')}<div class="empty"><strong>niets in deze categorie</strong>kies een andere, of leg je eigen recept vast.</div>`}`;
+    view.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
+      recipeFilter = ch.dataset.cat;
+      recipesExpanded = false;
+      drinkSel = null;
+      render();
+    }));
+    view.querySelector('#show-more')?.addEventListener('click', () => { recipesExpanded = true; render(); });
+    view.querySelector('#show-less')?.addEventListener('click', () => { recipesExpanded = false; render(); });
+    view.querySelector('#add-recipe')?.addEventListener('click', () => recipeForm());
+    view.querySelectorAll('.card[data-drink]').forEach(c => c.addEventListener('click', () => {
+      const rs = drinkMap.get(c.dataset.drink);
+      if (rs.length === 1) go('recipes', rs[0].id);
+      else { drinkSel = c.dataset.drink; render(); }
+    }));
+  }
+
+  function renderRecipeDetail(id) {
+    const r = allRecipes().find(x => x.id === id);
+    if (!r) return go('recipes');
+    topbarSub.textContent = 'Recept';
+    const specs = [
+      ['Dosis', r.dose], ['Water', r.water],
+      ['Ratio', r.ratio], ['Temp', r.temp], ['Tijd', r.time],
+    ].filter(([, v]) => v && v !== '—');
+    const custom = state.customRecipes.some(x => x.id === r.id);
+
+    // Calculator alleen voor filter-recepten met een leesbare ratio + water
+    const baseWater = r.cat === 'filter' ? parseNum(r.water) : null;
+    const denom = r.cat === 'filter' ? parseRatioDenom(r.ratio) : null;
+    const scalable = !!(baseWater && denom);
+    if (brewCalc.id !== r.id) brewCalc = { id: r.id, water: null };
+    const target = brewCalc.water || baseWater;
+    const factor = scalable ? target / baseWater : 1;
+    const doseOut = scalable ? Math.round(target / denom * 10) / 10 : null;
+
+    // Timer: getimede stappen of een richttijd (espresso-stopwatch)
+    if (brewTimer.id !== r.id) {
+      clearInterval(brewTimer.int);
+      brewTimer = { id: r.id, running: false, startTs: 0, elapsed: 0, int: null };
+    }
+    const timed = (r.steps || []).map(st => ({ ...st, sec: parseStepSec(st.t) })).filter(s => s.sec !== null);
+    const tTarget = parseTargetSec(r.time);
+    const endSec = Math.max(timed.length ? timed[timed.length - 1].sec + 30 : 0, tTarget ? tTarget.hi : 0) || 60;
+    const timerable = timed.length >= 2 || !!tTarget;
+    const fbTargetG = r.cat === 'filter' && scalable ? target : parseNum(r.water);
+
+    // Koffie kiezen: toont jouw eigen maalstand voor deze methode
+    if (recipeCoffee.id !== r.id) recipeCoffee = { id: r.id, coffeeId: '' };
+    const chosen = state.coffees.find(x => x.id === recipeCoffee.coffeeId);
+    const myGrind = chosen && ((chosen.grinds || []).find(gr => gr.method === r.method) || (chosen.grinds || [])[0]);
+    const grindGear = myGrind && state.gear.find(g => g.id === myGrind.gearId);
+    const coffeeHtml = state.coffees.length ? `
+      <div class="subsection">Jouw koffie</div>
+      <div class="field" style="margin-bottom:10px"><label>Koffie</label>
+        <select id="rc-select">
+          <option value="">—</option>
+          ${state.coffees.map(x => `<option value="${x.id}" ${x.id === recipeCoffee.coffeeId ? 'selected' : ''}>${esc(x.name)}${x.roaster ? ' · ' + esc(x.roaster) : ''}</option>`).join('')}
+        </select></div>
+      ${chosen ? (myGrind ? `<div class="specs" style="border-top:none;padding-top:0;margin-top:0">
+          <div class="spec"><span class="spec-k">Maalstand</span><span class="spec-v">${esc(myGrind.clicks)}<span class="unit"> kliks</span></span></div>
+          ${grindGear ? `<div class="spec"><span class="spec-k">Op</span><span class="spec-v">${esc(grindGear.brand + ' ' + grindGear.model)}</span></div>` : ''}
+          ${myGrind.dose ? `<div class="spec"><span class="spec-k">Jouw dosis</span><span class="spec-v">${esc(myGrind.dose)}<span class="unit"> g</span></span></div>` : ''}
+          ${myGrind.yield ? `<div class="spec"><span class="spec-k">Jouw yield</span><span class="spec-v">${esc(myGrind.yield)}<span class="unit"> g</span></span></div>` : ''}
+          ${myGrind.time ? `<div class="spec"><span class="spec-k">Jouw tijd</span><span class="spec-v">${esc(myGrind.time)}</span></div>` : ''}
+          ${myGrind.temp ? `<div class="spec"><span class="spec-k">Jouw temp</span><span class="spec-v">${esc(myGrind.temp)}<span class="unit"> °C</span></span></div>` : ''}
+        </div>${myGrind.notes ? `<div class="notice" style="margin-top:14px">${esc(myGrind.notes)}</div>` : ''}`
+        : `<div class="notice">Nog geen maalstand voor ${esc(chosen.name)} — leg er een vast bij de koffie zelf.</div>`) : ''}` : '';
+
+    const calcHtml = scalable ? `
+      <div class="subsection">Brouw-calculator</div>
+      <div class="card" style="cursor:default">
+        <div class="chips" style="margin:0 0 10px">
+          ${[1, 2, 3, 4].map(n =>
+            `<button class="chip ${target === n * WATER_PP ? 'active' : ''}" data-pers="${n}">${n} pers.</button>`).join('')}
+        </div>
+        <div class="field" style="margin-bottom:10px"><label>Water (g)</label>
+          <input id="calc-water" type="number" inputmode="numeric" min="100" max="2000" step="10" value="${target}"></div>
+        <div class="specs" style="border-top:none;padding-top:0;margin-top:0">
+          <div class="spec"><span class="spec-k">Aanbevolen dosis</span><span class="spec-v">${doseOut}<span class="unit"> g</span></span></div>
+          <div class="spec"><span class="spec-k">Ratio</span><span class="spec-v">${esc(r.ratio)}</span></div>
+        </div>
+        ${factor !== 1 ? `<div class="map-hint" style="margin:8px 0 0">Stappen geschaald naar ${target} g</div>` : ''}
+      </div>` : '';
+
+    view.innerHTML = `
+      <button class="back" id="back">← Terug</button>
+      <div class="detail-head">
+        <div class="detail-title">${esc(r.title)}</div>
+        <div class="detail-sub">${esc(r.method)}${r.cat ? ' · ' + esc(catLabel(r.cat)) : ''} · <span class="tag-source">${esc(r.source)}</span></div>
+      </div>
+      <div class="card" style="cursor:default"><div class="specs" style="border-top:none;padding-top:0;margin-top:0">
+        ${specs.map(([k, v]) => `<div class="spec"><span class="spec-k">${k}</span><span class="spec-v">${esc(v)}</span></div>`).join('')}
+      </div></div>
+      ${coffeeHtml}
+      ${calcHtml}
+      ${timerable ? `
+      <div class="subsection">Brouw-timer</div>
+      <div class="card" style="cursor:default">
+        <div class="timer-clock" id="t-clock">${fmtSec(timerNow())}</div>
+        <div class="timer-bar"><div class="timer-fill" id="t-fill"></div></div>
+        <div class="timer-next" id="t-next">${tTarget ? `Doel: ${fmtSec(tTarget.lo)}–${fmtSec(tTarget.hi)}` : ''}</div>
+        <div class="btn-row">
+          <button class="btn" id="t-start">${brewTimer.running ? 'Pauze' : (brewTimer.elapsed > 0 ? 'Verder' : 'Start')}</button>
+          <button class="btn ghost" id="t-reset">Reset</button>
+          <button class="btn ghost" id="t-done">Klaar</button>
+        </div>
+      </div>` : ''}
+      <div class="subsection">Stappen</div>
+      <div class="steps">
+        ${(r.steps || []).map(st => { const sec = parseStepSec(st.t); return `<div class="step"${sec !== null ? ` data-sec="${sec}"` : ''}><span>${esc(factor !== 1 ? scaleGrams(st.s, factor) : st.s)}${st.start ? '<span class="step-tag">timer start</span>' : ''}${st.opt ? '<span class="step-tag opt">optioneel</span>' : ''}</span>${st.t ? `<span class="step-time">${esc(st.t)}</span>` : ''}</div>`; }).join('')}
+      </div>
+      ${r.notes ? `<div class="notice" style="margin-top:16px">${esc(r.notes)}</div>` : ''}
+      ${readOnly ? '' : `<div class="btn-row">
+        ${custom ? `<button class="btn ghost" id="edit">Bewerken</button>
+        <button class="btn danger" id="del">Verwijderen</button>`
+        : `<button class="btn ghost block" id="save-as">Aanpassen en bewaren als eigen versie</button>`}
+      </div>`}`;
+    view.querySelector('#back').addEventListener('click', () => go('recipes'));
+    view.querySelectorAll('[data-pers]').forEach(b => b.addEventListener('click', () => {
+      brewCalc.water = +b.dataset.pers * WATER_PP; render();
+    }));
+    view.querySelector('#rc-select')?.addEventListener('change', e => {
+      recipeCoffee.coffeeId = e.target.value;
+      render();
+    });
+    view.querySelector('#save-as')?.addEventListener('click', () => recipeForm({
+      ...r, id: null, custom: true,
+      title: `${r.title} (mijn versie)`,
+      source: 'Eigen',
+      dose: myGrind?.dose ? `${myGrind.dose} g` : r.dose,
+      water: r.cat === 'filter' && scalable ? `${target} g` : (myGrind?.yield ? `${myGrind.yield} g uit (yield)` : r.water),
+      time: myGrind?.time || r.time,
+      temp: myGrind?.temp ? `${myGrind.temp} °C` : r.temp,
+      steps: (r.steps || []).map(st => ({ ...st, s: factor !== 1 ? scaleGrams(st.s, factor) : st.s })),
+      notes: [myGrind?.notes, chosen ? `Voor ${chosen.name}` : ''].filter(Boolean).join(' · ') || r.notes,
+    }));
+    view.querySelector('#calc-water')?.addEventListener('change', e => {
+      const v = +e.target.value;
+      if (v >= 100 && v <= 2000) { brewCalc.water = v; render(); }
+    });
+    if (timerable) {
+      const tick = () => timerTick(timed, endSec, factor, tTarget, r.time);
+      if (brewTimer.running && !brewTimer.int) brewTimer.int = setInterval(tick, 250);
+      tick();
+      const startBtn = view.querySelector('#t-start');
+      startBtn.addEventListener('click', () => {
+        if (brewTimer.running) {
+          brewTimer.elapsed = timerNow(); brewTimer.running = false;
+          clearInterval(brewTimer.int); brewTimer.int = null;
+          startBtn.textContent = 'Verder';
+        } else {
+          brewTimer.startTs = Date.now() - brewTimer.elapsed * 1000;
+          brewTimer.running = true;
+          brewTimer.int = setInterval(tick, 250);
+          startBtn.textContent = 'Pauze';
+        }
+      });
+      view.querySelector('#t-reset').addEventListener('click', () => {
+        brewTimer.elapsed = 0; brewTimer.running = false;
+        clearInterval(brewTimer.int); brewTimer.int = null;
+        startBtn.textContent = 'Start';
+        tick();
+      });
+      view.querySelector('#t-done').addEventListener('click', () => {
+        const sec = timerNow();
+        brewTimer.elapsed = sec; brewTimer.running = false;
+        clearInterval(brewTimer.int); brewTimer.int = null;
+        feedbackModal(r, sec, fbTargetG, chosen, myGrind, grindGear);
+      });
+    }
+    view.querySelector('#edit')?.addEventListener('click', () => recipeForm(r));
+    view.querySelector('#del')?.addEventListener('click', () => {
+      if (confirm(`${r.title} verwijderen?`)) {
+        state.customRecipes = state.customRecipes.filter(x => x.id !== r.id);
+        queueSave(); go('recipes');
+      }
+    });
+  }
+
+  function recipeForm(existing = null) {
+    const r = existing || {};
+    if (existing && !existing.id) existing = null; // voorgevuld sjabloon = nieuw recept
+    const stepsText = (r.steps || []).map(s => (s.t ? s.t + ' | ' : '') + s.s).join('\n');
+    openModal(existing ? 'Recept bewerken' : 'Eigen recept', `
+      <form id="recipe-form">
+        ${formField('Titel', 'title', r.title || '', 'text', 'required')}
+        ${formSelect('Categorie', 'cat', RECIPE_CATS, r.cat || 'espresso')}
+        ${formField('Drank (groepering)', 'drink', r.drink || '', 'text', 'placeholder="Cappuccino"')}
+        <div class="field-row">
+          ${formField('Methode', 'method', r.method || '', 'text', 'placeholder="Pour-over (V60)"')}
+          ${formField('Bron', 'source', r.source || 'Eigen', 'text')}
+        </div>
+        <div class="field-row">
+          ${formField('Dosis', 'dose', r.dose || '', 'text', 'placeholder="20 g"')}
+          ${formField('Water', 'water', r.water || '', 'text', 'placeholder="320 g"')}
+        </div>
+        <div class="field-row">
+          ${formField('Ratio', 'ratio', r.ratio || '', 'text', 'placeholder="1:16"')}
+          ${formField('Temp', 'temp', r.temp || '', 'text', 'placeholder="95 °C"')}
+        </div>
+        ${formField('Doorlooptijd', 'time', r.time || '', 'text', 'placeholder="3:00"')}
+        <div class="field"><label>Stappen (één per regel, optioneel "tijd | stap")</label>
+          <textarea name="steps" rows="6" placeholder="0:00 | Bloom met 60 g&#10;0:45 | Giet tot 125 g">${esc(stepsText)}</textarea></div>
+        <div class="field"><label>Notities</label><textarea name="notes">${esc(r.notes || '')}</textarea></div>
+        <div class="btn-row">
+          <button type="button" class="btn ghost" data-cancel>Annuleer</button>
+          <button type="submit" class="btn">Opslaan</button>
+        </div>
+      </form>`, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      modal.querySelector('#recipe-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const d = formData(e.target);
+        d.steps = d.steps.split('\n').filter(Boolean).map(line => {
+          const m = line.match(/^\s*([\d:]+)\s*\|\s*(.+)$/);
+          return m ? { t: m[1], s: m[2] } : { t: '', s: line.trim() };
+        });
+        if (existing) { Object.assign(existing, d); queueSave(); go('recipes', existing.id); }
+        else {
+          const saved = { id: uid(), ...d };
+          state.customRecipes.push(saved);
+          queueSave(); go('recipes', saved.id);
+        }
+      });
+    });
+  }
+
+
+  // ---------- back-up ----------
+  const backupName = () => `pleur-backup-${new Date().toISOString().slice(0, 10)}.json`;
+
+  function backupModal() {
+    openModal('Back-up', `
+      <div class="notice">Je gegevens staan bij deze pagina. Bewaar af en toe een kopie op je eigen apparaat.</div>
+      <button class="btn block" id="bk-export">Kopie opslaan</button>
+      <div id="bk-status" class="map-hint"></div>
+      ${readOnly ? '' : `<div class="subsection">Terugzetten</div>
+      <div class="notice">Een kopie terugzetten vervangt alles wat er nu in staat.</div>
+      <input type="file" id="bk-file" accept="application/json,.json" hidden>
+      <button class="btn ghost block" id="bk-import">Kopie kiezen…</button>`}
+      <div class="btn-row"><button type="button" class="btn ghost" data-cancel>Sluiten</button></div>
+    `, modal => {
+      const status = modal.querySelector('#bk-status');
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+
+      modal.querySelector('#bk-export').addEventListener('click', async () => {
+        const payload = JSON.stringify({
+          app: 'pleur', version: 1,
+          exported: new Date().toISOString(),
+          data: state,
+        }, null, 2);
+        const downloads = await window.claude?.use?.('downloads').catch(() => null) ?? null;
+        if (!downloads) { status.textContent = 'Opslaan kan hier niet.'; return; }
+        try {
+          await downloads.save({ filename: backupName(), data: payload });
+          status.textContent = 'Kopie opgeslagen.';
+        } catch (err) {
+          status.textContent = err?.code === 'declined' ? 'Afgebroken.' : 'Opslaan mislukt.';
+        }
+      });
+
+      const fileInput = modal.querySelector('#bk-file');
+      modal.querySelector('#bk-import')?.addEventListener('click', () => fileInput.click());
+      fileInput?.addEventListener('change', async () => {
+        const f = fileInput.files[0];
+        if (!f) return;
+        try {
+          const parsed = JSON.parse(await f.text());
+          const data = parsed.data || parsed;
+          if (!Array.isArray(data.coffees) || !Array.isArray(data.gear)) throw new Error('geen Pleur-kopie');
+          if (!confirm(`Kopie terugzetten? Alles wat er nu in staat (${state.coffees.length} koffies, ${state.gear.length} apparaten) wordt vervangen door ${data.coffees.length} koffies en ${data.gear.length} apparaten.`)) return;
+          state = { gear: [], coffees: [], customRecipes: [], ...data };
+          queueSave();
+          render();
+        } catch (err) {
+          status.textContent = 'Dit bestand is geen Pleur-kopie.';
+        }
+      });
+    });
+  }
+  document.getElementById('backup-btn')?.addEventListener('click', backupModal);
+
+  render();
+})();
+</script>
