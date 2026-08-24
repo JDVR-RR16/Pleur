@@ -1,5 +1,5 @@
 // Minimale service worker: cache-first voor eigen assets, zodat de app offline werkt.
-const CACHE = 'pleur-v8';
+const CACHE = 'pleur-v9';
 const ASSETS = [
   '.', 'index.html', 'css/style.css',
   'js/db.js', 'js/land.js', 'js/seed.js', 'js/scanner.js', 'js/app.js',
