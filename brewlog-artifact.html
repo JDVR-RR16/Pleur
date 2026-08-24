@@ -437,6 +437,8 @@ main { padding: 30px 26px 40px; max-width: 620px; margin: 0 auto; }
 .chips {
   display: flex; gap: 8px; overflow-x: auto; margin: 0 -26px 22px; padding: 2px 26px 6px;
   scrollbar-width: none;
+  justify-content: center;
+  justify-content: safe center;   /* blijft bereikbaar als ze niet passen */
 }
 .chips::-webkit-scrollbar { display: none; }
 .chip {
@@ -1532,17 +1534,13 @@ main { padding: 30px 26px 40px; max-width: 620px; margin: 0 auto; }
         </div>${c.process ? `<span class="badge">${esc(c.process)}</span>` : ''}</div></div>`).join('');
     view.innerHTML = `${roBanner()}
       <div class="section-head"><div class="section-title">Koffies — ${state.coffees.length}</div>
-        <div style="display:flex;gap:6px">
-          ${readOnly ? '' : '<button class="btn small ghost" id="scan">Scan</button>'}
-          ${addBtn('add-coffee', '+', 'Koffie toevoegen')}
-        </div></div>
+        ${addBtn('add-coffee', '+', 'Koffie toevoegen')}</div>
       <div class="chips">${chips}</div>
       ${body || `${illu('coffee')}<div class="empty"><strong>nog geen koffies</strong>scan een barcode of voeg er een met de hand toe.</div>`}`;
     view.querySelectorAll('[data-view]').forEach(ch => ch.addEventListener('click', () => {
       coffeeView = ch.dataset.view; mapSelection = null; render();
     }));
-    view.querySelector('#add-coffee')?.addEventListener('click', () => coffeeForm());
-    view.querySelector('#scan')?.addEventListener('click', scanFlow);
+    view.querySelector('#add-coffee')?.addEventListener('click', addCoffeeChoice);
     view.querySelectorAll('.card[data-id]').forEach(c => c.addEventListener('click', () => go('coffees', c.dataset.id)));
     if (coffeeView === 'kaart') initGlobe();
   }
@@ -1776,6 +1774,20 @@ main { padding: 30px 26px 40px; max-width: 620px; margin: 0 auto; }
     idleSince = performance.now();
     draw(); // eerste frame direct, ook als RAF nog niet vuurt
     globeRaf = requestAnimationFrame(frame);
+  }
+
+  // De plus vraagt eerst hoe je wilt toevoegen
+  function addCoffeeChoice() {
+    openModal('Koffie toevoegen', `
+      <button class="btn block" id="ac-scan">Barcode scannen</button>
+      <div class="divider-or">of</div>
+      <button class="btn ghost block" id="ac-manual">Zelf invullen</button>
+      <div class="btn-row"><button type="button" class="btn ghost" data-cancel>Annuleer</button></div>
+    `, modal => {
+      modal.querySelector('[data-cancel]').addEventListener('click', closeModal);
+      modal.querySelector('#ac-scan').addEventListener('click', scanFlow);
+      modal.querySelector('#ac-manual').addEventListener('click', () => coffeeForm());
+    });
   }
 
   function scanFlow() {

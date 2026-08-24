@@ -812,10 +812,7 @@
     view.innerHTML = `
       <div class="section-head">
         <div class="section-title">Koffies — ${DB.coffees.length}</div>
-        <div style="display:flex;gap:6px">
-          <button class="btn small ghost" id="scan">Scan</button>
-          <button class="btn small" id="add-coffee" aria-label="Koffie toevoegen">+</button>
-        </div>
+        <button class="btn small" id="add-coffee" aria-label="Koffie toevoegen">+</button>
       </div>
       <div class="chips">${chips}</div>
       ${body || `${illu('coffee')}<div class="empty"><strong>nog geen koffies</strong>scan een barcode of voeg er een met de hand toe.</div>`}`;
@@ -823,8 +820,7 @@
     view.querySelectorAll('[data-view]').forEach(ch => ch.addEventListener('click', () => {
       coffeeView = ch.dataset.view; mapSelection = null; render();
     }));
-    view.querySelector('#add-coffee').addEventListener('click', () => coffeeForm());
-    view.querySelector('#scan').addEventListener('click', scanFlow);
+    view.querySelector('#add-coffee')?.addEventListener('click', addCoffeeChoice);
     view.querySelectorAll('.card[data-id]').forEach(c =>
       c.addEventListener('click', () => go('coffees', c.dataset.id)));
     if (coffeeView === 'kaart') initGlobe();
@@ -1059,6 +1055,20 @@
     idleSince = performance.now();
     draw(); // eerste frame direct, ook als RAF nog niet vuurt
     globeRaf = requestAnimationFrame(frame);
+  }
+
+  // De plus vraagt eerst hoe je wilt toevoegen
+  function addCoffeeChoice() {
+    openModal('Koffie toevoegen', `
+      <button class="btn block" id="ac-scan">Barcode scannen</button>
+      <div class="divider-or">of</div>
+      <button class="btn ghost block" id="ac-manual">Zelf invullen</button>
+      <div class="btn-row"><button type="button" class="btn ghost" id="cancel">Annuleer</button></div>
+    `, modal => {
+      modal.querySelector('#cancel').addEventListener('click', closeModal);
+      modal.querySelector('#ac-scan').addEventListener('click', scanFlow);
+      modal.querySelector('#ac-manual').addEventListener('click', () => coffeeForm());
+    });
   }
 
   function scanFlow() {
