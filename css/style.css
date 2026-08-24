@@ -133,8 +133,9 @@ main { padding: 30px 26px 40px; max-width: 620px; margin: 0 auto; }
 }
 
 .empty {
-  padding: 40px 8px 34px; text-align: left;
-  color: var(--text-dim); font-size: 15px; max-width: 34ch;
+  padding: 18px 8px 34px; text-align: center;
+  color: var(--text-dim); font-size: 15px;
+  max-width: 34ch; margin: 0 auto;
 }
 .empty strong {
   display: block; margin-bottom: 6px;
@@ -144,8 +145,11 @@ main { padding: 30px 26px 40px; max-width: 620px; margin: 0 auto; }
 }
 
 /* handgetekend accent — één per scherm */
-.illu { color: var(--line-ui); margin: 6px 0 2px; }
-.illu svg { width: 132px; height: auto; display: block; }
+.illu {
+  color: var(--line-ui); margin: 30px auto 0;
+  display: flex; justify-content: center;
+}
+.illu svg { width: 128px; height: auto; display: block; }
 
 /* ---------- kaarten ---------- */
 .card {
